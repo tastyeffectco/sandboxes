@@ -115,6 +115,20 @@ likely to touch:
 | `SANDBOXED_API_BIND` | `127.0.0.1:9090` | Where the control-plane API is published |
 | `SANDBOXD_API_AUTH_DISABLED` | `true` | Open API for local use; set `false` + tokens for prod |
 
+## Uninstall
+
+```bash
+./uninstall.sh            # stop the stack + remove all sandboxes + network (keeps your data)
+./uninstall.sh --images   # also remove the built Docker images
+./uninstall.sh --data     # also DELETE all workspaces + state (asks to confirm)
+./uninstall.sh --all      # full removal: images + data
+```
+
+Safe by default — it removes only what sandboxed created (containers labelled
+`sandboxed.managed=true`, the compose stack, and the network) and **keeps your
+workspaces** under `SANDBOXED_DATA_DIR` unless you pass `--data`/`--all`. After
+`--all` you can delete the checkout itself with `rm -rf`.
+
 ## Production / TLS
 
 For a public deployment on a real wildcard domain:
