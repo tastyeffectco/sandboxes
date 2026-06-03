@@ -49,7 +49,7 @@ Auth is **off by default** (local). If you set `SANDBOXD_API_AUTH_DISABLED=false
 
 | Method & path | Body | Purpose |
 |---|---|---|
-| `POST /sandbox` | `{"ports":[3000]}` | create. `id` optional (ULID auto-generated); returns the row incl. `id`, `status` |
+| `POST /sandbox` | `{"ports":[3000],"env":{"ANTHROPIC_API_KEY":"sk-..."}}` | create. `id` optional (ULID auto); `env` injects vars into the container (agent keys). Returns the row incl. `id`, `status` |
 | `GET /sandboxes` | — | list all |
 | `GET /sandbox/{id}` | — | get one (status, ports, …) |
 | `POST /sandbox/{id}/exec` | `{"cmd":["bash","-lc","..."]}` | run a command (NON-interactive: no TTY/stdin) |
@@ -89,17 +89,23 @@ curl -s -XPOST $API/sandbox/$ID/purge
 
 ## Running Claude Code / OpenCode inside a sandbox
 Both CLIs (`claude`, `opencode`) are pre-installed in every sandbox; outbound
-network is allowed. Provide an `ANTHROPIC_API_KEY`:
+network is allowed. The clean path is to inject the key at **create** time so
+both the tasks API and any shell see it:
 ```bash
-# headless one-off (print mode works through the non-interactive exec API):
+# create with the key, then drive OpenCode headlessly via the tasks API:
+ID=$(curl -s -XPOST $API/sandbox -H 'content-type: application/json' \
+       -d '{"ports":[3000],"env":{"ANTHROPIC_API_KEY":"sk-ant-..."}}' \
+       | sed -E 's/.*"id":"([^"]+)".*/\1/')
+curl -s -XPOST $API/v1/sandboxes/$ID/tasks -H 'content-type: application/json' \
+  -d '{"prompt":"build a Vite todo app and run it on port 3000","agent":"opencode"}'
+# stream progress: curl -N $API/v1/sandboxes/$ID/tasks/<taskId>/events
+```
+Other ways to supply the key:
+```bash
+# one-off via exec (claude print mode is non-interactive-friendly):
 curl -s -XPOST $API/sandbox/$ID/exec -H 'content-type: application/json' \
   -d '{"cmd":["bash","-lc","ANTHROPIC_API_KEY=sk-ant-... claude -p \"write hello.py\""]}'
-
-# OR persist it so every shell + the tasks API sees it:
-curl -s -XPUT $API/v1/sandboxes/$ID/files -H 'content-type: application/json' \
-  -d '{"path":".bashrc","content":"export ANTHROPIC_API_KEY=sk-ant-...\n","append":true}'
-
-# OR interactive TUI on the host:
+# interactive TUI on the host:
 docker exec -it -e ANTHROPIC_API_KEY=sk-ant-... s-$ID bash   # then: claude
 ```
 

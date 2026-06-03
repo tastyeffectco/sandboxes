@@ -61,6 +61,13 @@ type createReq struct {
 	// the app workspace to on each task finish (auto-git-push). The URL
 	// is not a secret; the master token is host-side. Empty = off.
 	GitRemoteURL string `json:"git_remote_url,omitempty"`
+	// Env injects environment variables into the sandbox container at
+	// create time (e.g. {"ANTHROPIC_API_KEY":"sk-..."}). They are visible
+	// to the container's main process (runtimed) and therefore to coding
+	// agents (opencode/claude) it spawns. Values are passed straight to
+	// `docker run --env`; keys must be non-empty and free of '=' and
+	// newlines.
+	Env map[string]string `json:"env,omitempty"`
 }
 
 type sandboxResp struct {
@@ -492,6 +499,18 @@ func (s *Server) handleCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Build the optional env injection (e.g. agent API keys). Validate
+	// keys so a bad entry can't smuggle extra docker flags or break the
+	// KEY=VALUE encoding.
+	var envFlags []string
+	for k, v := range req.Env {
+		if k == "" || strings.ContainsAny(k, "=\n\r") || strings.ContainsAny(v, "\n\r") {
+			writeErr(w, http.StatusBadRequest, "invalid env var name/value: "+k)
+			return
+		}
+		envFlags = append(envFlags, k+"="+v)
+	}
+
 	// 2. docker run with the locked flag set + traefik labels.
 	labels := traefik.Labels(req.ID, req.Ports, s.PreviewDomain, visibility, s.PreviewEntrypoint, s.PreviewTLS)
 	startRun := time.Now()
@@ -510,6 +529,7 @@ func (s *Server) handleCreate(w http.ResponseWriter, r *http.Request) {
 		PidsLimit:   1024,
 		Ulimits:     []string{"nofile=65536:65536"},
 		Tmpfs:       []string{"/tmp:size=512m", "/var/tmp:size=128m"},
+		Env:         envFlags,
 		Volumes:     []string{mntPath + ":/home/sandbox"},
 		Labels:      labels,
 		Image:       s.Image,

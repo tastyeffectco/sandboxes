@@ -51,7 +51,7 @@ Traefik. That's the whole stack.
   converges Docker back to it on every boot. No external database, no message
   bus, no orchestrator.
 
-## Quick start
+## 1. Install
 
 Requirements: **Docker Engine + the Compose plugin**, on Linux. That's it.
 
@@ -61,60 +61,81 @@ cd sandboxes
 ./install.sh
 ```
 
-`install.sh` checks Docker, writes a `.env`, builds the sandbox base image and
-the control plane, and starts the stack. When it finishes it prints exactly how
-to create your first sandbox:
+`install.sh` checks Docker, writes a `.env`, builds the sandbox base image + the
+control plane, and starts the stack. The API is then live at
+`http://127.0.0.1:9090` (verify: `curl http://127.0.0.1:9090/healthz` → `ok`).
+
+## 2. Usage — have OpenCode build an app, then open its preview
+
+The base image already includes the **OpenCode** and **Claude Code** CLIs, so
+you can hand a sandbox a prompt and watch it build. Provide an API key at create
+time via `env`, then submit a task:
 
 ```bash
-# create a sandbox that exposes a dev server on port 3000.
-# the server generates a ULID id and returns it:
-ID=$(curl -s -XPOST http://127.0.0.1:9090/sandbox \
-       -H 'content-type: application/json' \
-       -d '{"ports":[3000]}' | sed -E 's/.*"id":"([^"]+)".*/\1/')
+API=http://127.0.0.1:9090
+
+# (1) create a sandbox on port 3000, with your agent's API key injected
+ID=$(curl -s -XPOST $API/sandbox -H 'content-type: application/json' -d '{
+        "ports":[3000],
+        "env":{"ANTHROPIC_API_KEY":"sk-ant-..."}
+     }' | sed -E 's/.*"id":"([^"]+)".*/\1/')
 echo "sandbox: $ID"
 
-# start something inside it
-curl -s -XPOST http://127.0.0.1:9090/sandbox/$ID/exec \
-  -H 'content-type: application/json' \
-  -d '{"cmd":["bash","-lc","cd ~/workspace && echo hi > index.html && python3 -m http.server 3000"]}'
+# (2) spin OpenCode with a request — it works in ~/workspace
+curl -s -XPOST $API/v1/sandboxes/$ID/tasks -H 'content-type: application/json' -d '{
+        "prompt":"create a Vite app that shows a todo list, and run it on port 3000",
+        "agent":"opencode"
+     }'
+# -> {"id":"<taskId>","status":"running","events_url":"/v1/sandboxes/<id>/tasks/<taskId>/events"}
 
-# open the preview (browsers resolve *.localhost to 127.0.0.1)
-open "http://s-$ID-3000.preview.localhost"
+# (3) stream the agent's progress (Server-Sent Events)
+curl -N $API/v1/sandboxes/$ID/tasks/<taskId>/events
 ```
 
-> `id` is optional — omit it and a ULID is generated. Pass your own (any
-> 26-char [ULID](https://github.com/ulid/spec)) to control it from your backend.
+### 3. See the preview URL
 
-Tear down at any time with `docker compose down`. Your workspaces stay on disk
-under `SANDBOXED_DATA_DIR`.
+Once the app is serving on port 3000, it's live at its preview URL — no extra
+wiring, the sandbox self-registered the route:
 
-## Running coding agents (Claude Code / OpenCode) inside a sandbox
-
-The base image ships with the **Claude Code** (`claude`) and **OpenCode**
-(`opencode`) CLIs pre-installed — it doesn't matter whether the host has them.
-Outbound network is default-allow, so a sandbox can reach `api.anthropic.com`.
-The only thing a fresh sandbox lacks is **credentials**; supply an API key one
-of these ways (`$ID` is a sandbox id from create):
-
-```bash
-# (a) headless, one-off — claude's print mode runs fine through the exec API:
-curl -s -XPOST http://127.0.0.1:9090/sandbox/$ID/exec \
-  -H 'content-type: application/json' \
-  -d '{"cmd":["bash","-lc","ANTHROPIC_API_KEY=sk-ant-... claude -p \"create app.py that prints hi\""]}'
-
-# (b) persist the key so every shell + the tasks API sees it:
-curl -s -XPUT http://127.0.0.1:9090/v1/sandboxes/$ID/files \
-  -H 'content-type: application/json' \
-  -d '{"path":".bashrc","content":"export ANTHROPIC_API_KEY=sk-ant-...\n","append":true}'
-
-# (c) interactive TUI — exec straight into the container with a terminal:
-docker exec -it -e ANTHROPIC_API_KEY=sk-ant-... s-$ID bash   # then run: claude
+```
+http://s-$ID-3000.preview.localhost
 ```
 
-> The HTTP `exec` endpoint is **non-interactive** (no TTY/stdin) — use
-> `claude -p "<prompt>"` for headless runs, or `docker exec -it` for the TUI.
-> The `POST /v1/sandboxes/{id}/tasks` API is the built-in headless-agent path;
-> it reads provider credentials from the workspace/env (set them via (b)).
+`*.localhost` resolves to `127.0.0.1` in every modern browser, so it just works
+locally (add `:$HTTP_PORT` if you changed it from 80). The first request to a
+stopped sandbox **wakes it** automatically. On a public domain you get
+`https://s-<id>-3000.preview.yourdomain.com` (see [Production / TLS](#production--tls)).
+
+> **No agent, just a shell?** Skip step 2 and run anything via the exec API:
+> `curl -XPOST $API/sandbox/$ID/exec -d '{"cmd":["bash","-lc","cd ~/workspace && python3 -m http.server 3000"]}'`
+> — then open the same preview URL. (exec is non-interactive; for the Claude/
+> OpenCode TUI use `docker exec -it s-$ID bash`.)
+
+## API
+
+Base URL = `http://127.0.0.1:9090` (set by `SANDBOXED_API_BIND`). Auth is **off
+by default**; with `SANDBOXD_API_AUTH_DISABLED=false` + `SANDBOXD_API_TOKENS`,
+add `-H "Authorization: Bearer <secret>"`.
+
+| Method & path | Body | Purpose |
+|---|---|---|
+| `POST /sandbox` | `{"ports":[3000],"env":{...}}` | **create** — `id` optional (ULID auto), `env` injects vars (e.g. API keys) |
+| `GET /sandboxes` | — | list all sandboxes |
+| `GET /sandbox/{id}` | — | get one (status, ports, container id…) |
+| `POST /sandbox/{id}/exec` | `{"cmd":["bash","-lc","…"]}` | run a command (non-interactive) |
+| `POST /sandbox/{id}/keepalive` | — | postpone the idle reaper |
+| `POST /v1/sandboxes/{id}/stop` | — | stop now to free RAM (wakes on next preview hit) |
+| `DELETE /sandbox/{id}` | — | destroy the container, **keep** the workspace |
+| `POST /sandbox/{id}/purge` | — | destroy **and delete** the workspace |
+| `POST /v1/sandboxes/{id}/tasks` | `{"prompt":"…","agent":"opencode"}` | run a coding agent headlessly |
+| `GET /v1/sandboxes/{id}/tasks/{taskId}` | — | task result |
+| `GET /v1/sandboxes/{id}/tasks/{taskId}/events` | — | live task event stream (SSE) |
+| `GET/PUT /v1/sandboxes/{id}/files` | `{"path","content","append"}` | list / read / write workspace files |
+| `GET /healthz`, `GET /readyz` | — | liveness / readiness |
+
+Full runbook for scripting or driving from an agent: [`AGENTS.md`](AGENTS.md).
+Tear down a single sandbox with `DELETE`/`purge`; tear down the whole stack with
+`docker compose down` (workspaces persist under `SANDBOXED_DATA_DIR`).
 
 ## How it works
 

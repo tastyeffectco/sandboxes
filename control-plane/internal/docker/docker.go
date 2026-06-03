@@ -48,6 +48,7 @@ type RunSpec struct {
 	PidsLimit  int      // --pids-limit=1024
 	Ulimits    []string // --ulimit nofile=65536:65536
 	Tmpfs      []string // --tmpfs /tmp:size=512m   (one --tmpfs flag per entry)
+	Env        []string // --env KEY=VAL   (one --env flag per entry)
 	Volumes    []string // -v <host>:<container>[:opts]
 	Labels     []string // --label key=value
 	Image      string   // last positional
@@ -95,6 +96,9 @@ func (c *Client) Run(ctx context.Context, spec RunSpec) (string, error) {
 	}
 	for _, v := range spec.Tmpfs {
 		args = append(args, "--tmpfs", v)
+	}
+	for _, v := range spec.Env {
+		args = append(args, "--env", v)
 	}
 	for _, v := range spec.Volumes {
 		args = append(args, "-v", v)
