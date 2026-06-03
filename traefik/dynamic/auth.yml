@@ -1,0 +1,21 @@
+# Forward-auth middleware for PRIVATE sandboxes.
+#
+# sandboxd attaches the label
+#   traefik.http.routers.<router>.middlewares=sandbox-preview-auth@file
+# to a sandbox's router only when it is created with visibility="private".
+# Public sandboxes never reference this middleware, so this file is inert
+# for the default (public) workflow — it exists so private sandboxes work
+# out of the box if you use them.
+#
+# On each request to a private sandbox, Traefik calls sandboxd's
+# /forward-auth; a 2xx allows and forwards the viewer identity header, a
+# non-2xx denies. See the README "Private sandboxes" section.
+
+http:
+  middlewares:
+    sandbox-preview-auth:
+      forwardAuth:
+        address: "http://sandboxd:9000/forward-auth"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - X-Sandbox-External-User-Id

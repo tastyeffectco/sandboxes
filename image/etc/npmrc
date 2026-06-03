@@ -1,0 +1,5 @@
+registry=https://registry.npmjs.org/
+prefer-offline=true
+fund=false
+audit=false
+store-dir=/home/sandbox/.cache/pnpm-store

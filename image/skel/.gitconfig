@@ -1,0 +1,8 @@
+[init]
+    defaultBranch = main
+[pull]
+    rebase = false
+# user.name and user.email are intentionally omitted.
+# Users set their own before their first commit. Shipping a fake
+# default identity would silently attach the wrong name/email to
+# commits; the git prompt is the correct UX.

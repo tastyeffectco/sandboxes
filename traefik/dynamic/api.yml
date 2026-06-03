@@ -1,0 +1,26 @@
+# Optional: expose the sandboxd control-plane API through Traefik at
+#   http://api.preview.<domain>
+# (e.g. http://api.preview.localhost). The API is also published on the
+# loopback by the compose file (SANDBOXED_API_BIND, default
+# 127.0.0.1:9090) — this router is for reaching it over the edge.
+#
+# sandboxd's own auth applies: when SANDBOXD_API_AUTH_DISABLED=false and
+# SANDBOXD_API_TOKENS is set, external calls require a bearer token;
+# /healthz, /readyz, /preview-auth and /forward-auth stay open.
+#
+# Matches api.preview.<anything> so it follows PREVIEW_DOMAIN without
+# edits. Delete this file to make the API unreachable through Traefik.
+
+http:
+  routers:
+    sandbox-api:
+      rule: "HostRegexp(`^api\\.preview\\..+$`)"
+      entryPoints: [web]
+      service: sandbox-api
+      priority: 100
+
+  services:
+    sandbox-api:
+      loadBalancer:
+        servers:
+          - url: "http://sandboxd:9000"

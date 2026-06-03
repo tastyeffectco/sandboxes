@@ -1,0 +1,55 @@
+# sandboxed — Traefik v3 static configuration (OSS / docker-native).
+#
+# Plain HTTP by default: browsers resolve any *.localhost name to
+# 127.0.0.1, so preview URLs like
+#   http://s-<id>-<port>.preview.localhost
+# work with zero DNS and zero certificates. For a public deployment on a
+# real wildcard domain, see the "Production / TLS" section of the README
+# (uncomment the websecure entrypoint + add a cert resolver, and set
+# PREVIEW_ENTRYPOINT=websecure / PREVIEW_TLS=true on sandboxd).
+
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+api:
+  dashboard: false
+
+entryPoints:
+  web:
+    address: ":80"
+  # websecure:
+  #   address: ":443"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    # Only route containers this distribution manages. sandboxd emits the
+    # `sandboxed.managed=true` label on every sandbox it creates, so this
+    # Traefik never touches unrelated containers that happen to share the
+    # daemon (including another Traefik's, or a different stack's).
+    constraints: "Label(`sandboxed.managed`,`true`)"
+    # The network sandboxes (and this Traefik) share. Must match
+    # SANDBOXED_NETWORK / the compose network name.
+    network: sandboxed_net
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+log:
+  level: INFO
+  format: json
+
+accessLog:
+  # Written to a path bind-mounted into BOTH traefik and sandboxd so the
+  # control plane's tailer can read RequestHost lines and keep sandboxes
+  # marked active. Must match SANDBOXED_LOG_DIR / SANDBOXD_ACCESS_LOG.
+  filePath: /var/lib/sandboxed/log/traefik-access.log
+  format: json
+  bufferingSize: 0
+  fields:
+    headers:
+      defaultMode: drop
+      names:
+        User-Agent: keep

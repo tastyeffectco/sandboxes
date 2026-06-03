@@ -1,0 +1,21 @@
+# Local environment / secrets
+.env
+*.env.local
+
+# Runtime data (workspaces, SQLite state, logs) — never commit
+/data/
+*.db
+*.db-wal
+*.db-shm
+
+# Build artifacts
+/control-plane/sandboxd
+/control-plane/runtimed
+*.test
+*.out
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/

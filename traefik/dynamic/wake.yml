@@ -1,0 +1,27 @@
+# Traefik file-provider catch-all for the wake path.
+#
+# Per-sandbox routers (emitted as Docker labels by sandboxd) carry
+# priority=100; this catch-all is priority=1, so a RUNNING sandbox's own
+# route always wins. The catch-all only fires for preview hostnames whose
+# backing container is currently STOPPED (or not yet observed by Traefik
+# right after a wake) — it forwards them to sandboxd, which wakes the
+# sandbox (docker start) and then proxies the request.
+#
+# The HostRegexp matches the preview shape for ANY domain
+# (s-<id>-<port>.preview.<anything>) so you don't have to edit this file
+# when you change PREVIEW_DOMAIN — sandboxd validates the exact domain.
+
+http:
+  routers:
+    sandbox-wake:
+      rule: "HostRegexp(`^s-[0-9A-Za-z]+-[0-9]+\\.preview\\..+$`)"
+      entryPoints: [web]
+      service: sandbox-wake
+      priority: 1
+
+  services:
+    sandbox-wake:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://sandboxd:9000"
