@@ -58,6 +58,17 @@ message queue — you could read the whole thing in an afternoon.
             └─────┴────────────────────────────────────────────────────────-─┘
 ```
 
+### Who's it for?
+
+**✅ Use it if** you're running **many sandboxes for other people** — an AI
+app-builder ("describe an app → see it live"), an agent platform, a coding
+playground, per-user or per-branch preview environments, or multi-app hosting
+for a team.
+
+**❌ Skip it if** you just need one or two containers for yourself — a shell
+script, `docker run`, or [lxd](https://canonical.com/lxd) is simpler. (More on
+that [below](#why-not-just-a-shell-script).)
+
 ## Why sandboxed?
 
 If you're building an **AI app-builder, an agent platform, a coding playground,
