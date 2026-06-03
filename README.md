@@ -19,6 +19,9 @@ so you can pack many of them onto one modest host.
 It's a small Go control plane that drives the Docker daemon, fronted by
 Traefik. That's the whole stack.
 
+> **Driving it from an agent or script?** See [`AGENTS.md`](AGENTS.md) — a
+> single self-contained runbook (install → API → agent auth → uninstall).
+
 ```
             ┌──────────── your host (just needs Docker) ────────────┐
  browser ──▶│  Traefik  ──▶  sandbox container (dev server :3000)    │
@@ -53,8 +56,8 @@ Traefik. That's the whole stack.
 Requirements: **Docker Engine + the Compose plugin**, on Linux. That's it.
 
 ```bash
-git clone <your-fork-url> sandboxed
-cd sandboxed
+git clone https://github.com/tastyeffectco/sandboxes.git
+cd sandboxes
 ./install.sh
 ```
 
@@ -84,6 +87,34 @@ open "http://s-$ID-3000.preview.localhost"
 
 Tear down at any time with `docker compose down`. Your workspaces stay on disk
 under `SANDBOXED_DATA_DIR`.
+
+## Running coding agents (Claude Code / OpenCode) inside a sandbox
+
+The base image ships with the **Claude Code** (`claude`) and **OpenCode**
+(`opencode`) CLIs pre-installed — it doesn't matter whether the host has them.
+Outbound network is default-allow, so a sandbox can reach `api.anthropic.com`.
+The only thing a fresh sandbox lacks is **credentials**; supply an API key one
+of these ways (`$ID` is a sandbox id from create):
+
+```bash
+# (a) headless, one-off — claude's print mode runs fine through the exec API:
+curl -s -XPOST http://127.0.0.1:9090/sandbox/$ID/exec \
+  -H 'content-type: application/json' \
+  -d '{"cmd":["bash","-lc","ANTHROPIC_API_KEY=sk-ant-... claude -p \"create app.py that prints hi\""]}'
+
+# (b) persist the key so every shell + the tasks API sees it:
+curl -s -XPUT http://127.0.0.1:9090/v1/sandboxes/$ID/files \
+  -H 'content-type: application/json' \
+  -d '{"path":".bashrc","content":"export ANTHROPIC_API_KEY=sk-ant-...\n","append":true}'
+
+# (c) interactive TUI — exec straight into the container with a terminal:
+docker exec -it -e ANTHROPIC_API_KEY=sk-ant-... s-$ID bash   # then run: claude
+```
+
+> The HTTP `exec` endpoint is **non-interactive** (no TTY/stdin) — use
+> `claude -p "<prompt>"` for headless runs, or `docker exec -it` for the TUI.
+> The `POST /v1/sandboxes/{id}/tasks` API is the built-in headless-agent path;
+> it reads provider credentials from the workspace/env (set them via (b)).
 
 ## How it works
 
