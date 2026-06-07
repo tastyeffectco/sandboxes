@@ -6,11 +6,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/activity"
-	"github.com/sandboxed/control-plane/internal/docker"
-	"github.com/sandboxed/control-plane/internal/egress"
-	"github.com/sandboxed/control-plane/internal/metrics"
-	"github.com/sandboxed/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/activity"
+	"github.com/sandboxd/control-plane/internal/docker"
+	"github.com/sandboxd/control-plane/internal/egress"
+	"github.com/sandboxd/control-plane/internal/metrics"
+	"github.com/sandboxd/control-plane/internal/store"
 )
 
 // PressureConfig captures the env-tunable knobs from roadmap §12.

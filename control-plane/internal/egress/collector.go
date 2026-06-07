@@ -17,7 +17,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/metrics"
+	"github.com/sandboxd/control-plane/internal/metrics"
 )
 
 // Collector tails journalctl for kernel messages with prefix

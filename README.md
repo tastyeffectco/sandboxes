@@ -1,4 +1,4 @@
-<h1 align="center">sandboxed</h1>
+<h1 align="center">sandboxd</h1>
 
 
 <p align="center">
@@ -16,14 +16,14 @@
 
 ---
 
-<img width="1100" height="816" alt="sandboxed-demo" src="https://github.com/user-attachments/assets/f794ff9b-8ffe-47e8-bd30-22541f870f09" />
+<img width="1100" height="816" alt="sandboxd-demo" src="https://github.com/user-attachments/assets/f794ff9b-8ffe-47e8-bd30-22541f870f09" />
 
 
-## What is sandboxed? (start here)
+## What is sandboxd? (start here)
 
 Think of the apps where you type *"build me a todo app"* and seconds later a
 working website appears at its own link — like Lovable, Bolt, v0, or Replit.
-**sandboxed is the open-source backend that makes that possible**, running on
+**sandboxd is the open-source backend that makes that possible**, running on
 your own server.
 
 Here's what it does, in plain terms. You send it one HTTP request, and it:
@@ -73,7 +73,7 @@ for a team.
 script, `docker run`, or [lxd](https://canonical.com/lxd) is simpler. (More on
 that [below](#why-not-just-a-shell-script).)
 
-## Why sandboxed?
+## Why sandboxd?
 
 If you're building an **AI app-builder, an agent platform, a coding playground,
 or a per-user preview product**, the hard part isn't the prompt — it's the
@@ -86,7 +86,7 @@ infrastructure underneath it:
   progress, capture the result.
 - **Persistence, wake-on-demand, reconciliation after a crash or reboot.**
 
-That's months of platform work. sandboxed is that platform, distilled to one
+That's months of platform work. sandboxd is that platform, distilled to one
 command:
 
 - ⚡ **One-command install.** `./install.sh` and you have a working API + previews.
@@ -105,7 +105,7 @@ command:
 
 Fair question — and honestly: **if you need one or two long-lived containers for
 yourself, a shell script (or `docker run`, or [lxd](https://canonical.com/lxd))
-is simpler. Use that.** We mean it. sandboxed is overkill for one-off projects.
+is simpler. Use that.** We mean it. sandboxd is overkill for one-off projects.
 
 It earns its keep the moment you're running **many** sandboxes for **other
 people** — a team, or a product — because that's when the tidy little `docker
@@ -128,7 +128,7 @@ run` script quietly grows into all of this:
 - **Agents with a lifecycle.** Submit a prompt, stream progress (SSE), capture a
   durable result — not just `opencode` fired inline.
 
-Rebuild those as your script grows and you've rebuilt sandboxed. So: skip it for
+Rebuild those as your script grows and you've rebuilt sandboxd. So: skip it for
 one-offs; reach for it when "just a script" has started keeping you up at night.
 
 > **Prefer Kubernetes?** The control plane talks to the container runtime through
@@ -144,7 +144,7 @@ Requirements: **Docker Engine + the Compose plugin**, on Linux. That's it.
 ### 1. Install
 
 ```bash
-git clone https://github.com/tastyeffectco/sandboxes.git
+git clone https://github.com/tastyeffectco/sandboxd.git
 cd sandboxes
 ./install.sh
 ```
@@ -206,7 +206,7 @@ real domain you get `https://s-<id>-3000.preview.yourdomain.com`
 
 ## API
 
-Base URL = `http://127.0.0.1:9090` (set by `SANDBOXED_API_BIND`). Auth is **off
+Base URL = `http://127.0.0.1:9090` (set by `SANDBOXD_API_BIND`). Auth is **off
 by default** for local use; with `SANDBOXD_API_AUTH_DISABLED=false` +
 `SANDBOXD_API_TOKENS`, send `-H "Authorization: Bearer <secret>"`.
 
@@ -253,8 +253,8 @@ The defaults run a complete local stack. The knobs you'll touch most:
 |---|---|---|
 | `PREVIEW_DOMAIN` | `localhost` | domain preview URLs hang off |
 | `HTTP_PORT` | `80` | host port Traefik listens on |
-| `SANDBOXED_DATA_DIR` | `/var/lib/sandboxed` | where workspaces + state live |
-| `SANDBOXED_API_BIND` | `127.0.0.1:9090` | where the control-plane API is published |
+| `SANDBOXD_DATA_DIR` | `/var/lib/sandboxed` | where workspaces + state live |
+| `SANDBOXD_API_BIND` | `127.0.0.1:9090` | where the control-plane API is published |
 | `SANDBOXD_API_AUTH_DISABLED` | `true` | open API for local use; set `false` + tokens for prod |
 
 ## Production / TLS
@@ -279,22 +279,22 @@ For a public deployment on a real wildcard domain:
 ./uninstall.sh --all      # full removal: images + data
 ```
 
-Safe by default — it removes only what sandboxed created (containers labelled
-`sandboxed.managed=true`, the compose stack, the network) and **keeps your
+Safe by default — it removes only what sandboxd created (containers labelled
+`sandboxd.managed=true`, the compose stack, the network) and **keeps your
 workspaces** unless you pass `--data`/`--all`.
 
 ## Is this a good foundation for a startup?
 
 Yes — that's exactly the point. If you want to ship an **AI app-builder or agent
 SaaS** without first spending months building multi-tenant isolation, preview
-routing, idle/wake cost control, and agent orchestration, sandboxed gives you
+routing, idle/wake cost control, and agent orchestration, sandboxd gives you
 that core on day one, on a single inexpensive server, with margins you control.
 It's a **strong, honest starting point** — beta-quality, MIT-licensed, and built
 to be read and extended. Launch lean on it; harden as you grow (next section).
 
 ## Before you scale hard: what's simple on purpose, and what to harden
 
-sandboxed v1 is tuned for "**works anywhere with just Docker, in one command**."
+sandboxd v1 is tuned for "**works anywhere with just Docker, in one command**."
 To keep it that simple, a few things were left basic **on purpose**. None of
 them affect the core loop (create → build → preview → sleep → wake → persist) —
 they're the knobs to tighten once you have real users and real money on the line.

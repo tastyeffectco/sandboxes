@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/runtime"
+	"github.com/sandboxd/control-plane/internal/runtime"
 )
 
 var errTaskInProgress = errors.New("a task is already in progress")

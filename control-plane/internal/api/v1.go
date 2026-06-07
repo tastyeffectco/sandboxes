@@ -16,9 +16,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/audit"
-	"github.com/sandboxed/control-plane/internal/runtime"
-	"github.com/sandboxed/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/audit"
+	"github.com/sandboxd/control-plane/internal/runtime"
+	"github.com/sandboxd/control-plane/internal/store"
 )
 
 // defaultTemplate is the one fixed snapshot variant in v1.

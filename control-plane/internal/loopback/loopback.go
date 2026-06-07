@@ -7,7 +7,7 @@
 // userns-remap subuid math) which is hostile to a portable "runs fully
 // on Docker, one-click install" distribution.
 //
-// The OSS "sandboxed" build replaces the loopback with a plain
+// The OSS "sandboxd" build replaces the loopback with a plain
 // bind-mounted directory per sandbox under a single data root. The
 // trade-off is explicit and documented in the README: NO hard
 // per-workspace disk quota (the host filesystem is shared). Everything
@@ -47,7 +47,7 @@ type Manager struct {
 func New() *Manager {
 	return &Manager{
 		Root:      "/var/lib/sandboxed/workspaces",
-		SeedImage: "sandboxed-base:1.0.0",
+		SeedImage: "sandboxd-base:1.0.0",
 		DockerBin: "docker",
 		Userns:    "host",
 	}

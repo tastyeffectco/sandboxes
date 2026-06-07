@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/metrics"
-	"github.com/sandboxed/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/metrics"
+	"github.com/sandboxd/control-plane/internal/store"
 )
 
 // RestoreResult is returned to the API caller on success.

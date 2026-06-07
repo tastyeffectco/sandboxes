@@ -1,12 +1,12 @@
-# Contributing to sandboxed
+# Contributing to sandboxd
 
-Thanks for your interest! sandboxed aims to stay **small, reliable, and easy to
+Thanks for your interest! sandboxd aims to stay **small, reliable, and easy to
 self-host**. We favour a tight, well-understood core over feature breadth.
 
 ## Project layout
 
 ```
-sandboxed/
+sandboxd/
 ├── docker-compose.yml     # the full stack: traefik + sandboxd
 ├── install.sh             # one-click installer
 ├── .env.example           # all configuration, with defaults
@@ -31,7 +31,7 @@ go vet ./...
 ```
 
 To exercise the whole stack, run `./install.sh` (or `docker compose up -d
---build`) and hit the API on `SANDBOXED_API_BIND`. The base image build is the
+--build`) and hit the API on `SANDBOXD_API_BIND`. The base image build is the
 slow part; it's cached after the first run.
 
 ## Guidelines

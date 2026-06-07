@@ -19,7 +19,7 @@ func TestLabels_SinglePort_HTTP(t *testing.T) {
 	got := Labels("nx", []int{3000}, "localhost", "public", "web", false)
 	want := []string{
 		"traefik.enable=true",
-		"sandboxed.managed=true",
+		"sandboxd.managed=true",
 		"traefik.http.routers.s-nx-3000.rule=Host(`s-nx-3000.preview.localhost`)",
 		"traefik.http.routers.s-nx-3000.entrypoints=web",
 		"traefik.http.routers.s-nx-3000.priority=100",
@@ -35,7 +35,7 @@ func TestLabels_SinglePort_TLS(t *testing.T) {
 	got := Labels("nx", []int{3000}, "example.com", "public", "websecure", true)
 	want := []string{
 		"traefik.enable=true",
-		"sandboxed.managed=true",
+		"sandboxd.managed=true",
 		"traefik.http.routers.s-nx-3000.rule=Host(`s-nx-3000.preview.example.com`)",
 		"traefik.http.routers.s-nx-3000.entrypoints=websecure",
 		"traefik.http.routers.s-nx-3000.priority=100",

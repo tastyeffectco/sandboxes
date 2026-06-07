@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# sandboxed — one-click installer.
+# sandboxd — one-click installer.
 #
 #   curl -fsSL .../install.sh | bash      # or: ./install.sh
 #
@@ -47,7 +47,7 @@ else
   die "Docker Compose not found. Install the Compose plugin (docker compose)."
 fi
 
-bold "sandboxed — installer"
+bold "sandboxd — installer"
 ok "Docker:  $($DOCKER version --format '{{.Server.Version}}' 2>/dev/null || echo present)"
 ok "Compose: $($COMPOSE version --short 2>/dev/null || echo present)"
 
@@ -61,9 +61,9 @@ fi
 
 # Load .env so we know the data dir / image tag to use below.
 set -a; . ./.env; set +a
-DATA_DIR="${SANDBOXED_DATA_DIR:-/var/lib/sandboxed}"
-LOG_DIR="${SANDBOXED_LOG_DIR:-$DATA_DIR/log}"
-BASE_IMAGE="${SANDBOXED_IMAGE:-sandboxed-base:1.0.0}"
+DATA_DIR="${SANDBOXD_DATA_DIR:-/var/lib/sandboxed}"
+LOG_DIR="${SANDBOXD_LOG_DIR:-$DATA_DIR/log}"
+BASE_IMAGE="${SANDBOXD_IMAGE:-sandboxd-base:1.0.0}"
 
 # ── data dir ─────────────────────────────────────────────────────────
 # Create it (sudo if we don't own the parent). Workspaces + SQLite + the
@@ -81,7 +81,7 @@ ok "data dir ready: $DATA_DIR"
 
 # ── build the sandbox base image ─────────────────────────────────────
 bold "Building the sandbox base image (one-time, a few minutes)…"
-DOCKER="$DOCKER" SANDBOXED_IMAGE="$BASE_IMAGE" bash image/build.sh "${BASE_IMAGE##*:}"
+DOCKER="$DOCKER" SANDBOXD_IMAGE="$BASE_IMAGE" bash image/build.sh "${BASE_IMAGE##*:}"
 ok "base image: $BASE_IMAGE"
 
 # ── build + start the stack ──────────────────────────────────────────
@@ -91,13 +91,13 @@ $COMPOSE up -d
 ok "stack is up"
 
 # ── summary ──────────────────────────────────────────────────────────
-API_BIND="${SANDBOXED_API_BIND:-127.0.0.1:9090}"
+API_BIND="${SANDBOXD_API_BIND:-127.0.0.1:9090}"
 HTTP_PORT="${HTTP_PORT:-80}"
 PREVIEW_DOMAIN="${PREVIEW_DOMAIN:-localhost}"
 PORTSUFFIX=""; [ "$HTTP_PORT" != "80" ] && PORTSUFFIX=":$HTTP_PORT"
 
 echo
-bold "sandboxed is running 🎉"
+bold "sandboxd is running 🎉"
 cat <<EOF
 
   Control-plane API : http://${API_BIND}

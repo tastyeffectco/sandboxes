@@ -14,14 +14,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/audit"
-	"github.com/sandboxed/control-plane/internal/auth"
-	"github.com/sandboxed/control-plane/internal/cgroup"
-	"github.com/sandboxed/control-plane/internal/docker"
-	"github.com/sandboxed/control-plane/internal/egress"
-	"github.com/sandboxed/control-plane/internal/idlock"
-	"github.com/sandboxed/control-plane/internal/metrics"
-	"github.com/sandboxed/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/audit"
+	"github.com/sandboxd/control-plane/internal/auth"
+	"github.com/sandboxd/control-plane/internal/cgroup"
+	"github.com/sandboxd/control-plane/internal/docker"
+	"github.com/sandboxd/control-plane/internal/egress"
+	"github.com/sandboxd/control-plane/internal/idlock"
+	"github.com/sandboxd/control-plane/internal/metrics"
+	"github.com/sandboxd/control-plane/internal/store"
 )
 
 // Handler implements both HTML and JSON wake entry points.

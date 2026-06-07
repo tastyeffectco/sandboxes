@@ -10,17 +10,17 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/sandboxed/control-plane/internal/activity"
-	"github.com/sandboxed/control-plane/internal/audit"
-	"github.com/sandboxed/control-plane/internal/auth"
-	"github.com/sandboxed/control-plane/internal/docker"
-	"github.com/sandboxed/control-plane/internal/egress"
-	"github.com/sandboxed/control-plane/internal/idlock"
-	"github.com/sandboxed/control-plane/internal/loopback"
-	"github.com/sandboxed/control-plane/internal/metrics"
-	"github.com/sandboxed/control-plane/internal/snapshot"
-	"github.com/sandboxed/control-plane/internal/store"
-	"github.com/sandboxed/control-plane/internal/wake"
+	"github.com/sandboxd/control-plane/internal/activity"
+	"github.com/sandboxd/control-plane/internal/audit"
+	"github.com/sandboxd/control-plane/internal/auth"
+	"github.com/sandboxd/control-plane/internal/docker"
+	"github.com/sandboxd/control-plane/internal/egress"
+	"github.com/sandboxd/control-plane/internal/idlock"
+	"github.com/sandboxd/control-plane/internal/loopback"
+	"github.com/sandboxd/control-plane/internal/metrics"
+	"github.com/sandboxd/control-plane/internal/snapshot"
+	"github.com/sandboxd/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/wake"
 )
 
 // Server bundles the collaborators the handlers need.
@@ -34,7 +34,7 @@ type Server struct {
 
 	// OSS docker-native knobs (see cmd/sandboxd/main.go for env wiring):
 	//   Network           — shared docker network sandboxes join so Traefik
-	//                        can route to them (e.g. sandboxed_net).
+	//                        can route to them (e.g. sandboxd_net).
 	//   PreviewEntrypoint — Traefik entrypoint on preview routers ("web"
 	//                        plain HTTP by default, "websecure" for TLS).
 	//   PreviewTLS        — emit tls=true on preview routers (needs a cert in

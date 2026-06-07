@@ -17,9 +17,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/audit"
-	"github.com/sandboxed/control-plane/internal/auth"
-	"github.com/sandboxed/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/audit"
+	"github.com/sandboxd/control-plane/internal/auth"
+	"github.com/sandboxd/control-plane/internal/store"
 )
 
 // v1Snapshot is the public snapshot object.

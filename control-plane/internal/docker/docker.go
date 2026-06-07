@@ -37,7 +37,7 @@ func NewClient() *Client { return &Client{Bin: "docker"} }
 type RunSpec struct {
 	Name       string   // --name
 	Hostname   string   // --hostname
-	Network    string   // --network (OSS: shared sandboxed_net so Traefik can route)
+	Network    string   // --network (OSS: shared sandboxd_net so Traefik can route)
 	Userns     string   // --userns (OSS: "host" for deterministic workspace ownership)
 	ReadOnly   bool     // --read-only
 	CapDrop    []string // --cap-drop=ALL (passed once per entry)
@@ -164,7 +164,7 @@ func (cj *ContainerJSON) BridgeIP() string {
 	}
 	// Prefer the legacy default bridge if present, then fall back to the
 	// first network that has an IP. In the OSS build sandboxes join a
-	// user-defined network (sandboxed_net), so the "bridge" key is absent
+	// user-defined network (sandboxd_net), so the "bridge" key is absent
 	// and we must scan whatever network the container actually got.
 	if n, ok := cj.NetworkSettings.Networks["bridge"]; ok && n != nil && n.IPAddress != "" {
 		return n.IPAddress

@@ -1,4 +1,4 @@
-module github.com/sandboxed/control-plane
+module github.com/sandboxd/control-plane
 
 go 1.22
 

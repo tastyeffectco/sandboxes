@@ -1,4 +1,4 @@
-# sandboxed — full stack, runs entirely on Docker.
+# sandboxd — full stack, runs entirely on Docker.
 #
 #   traefik   edge router; turns each sandbox's labels into an HTTPS-or-
 #             HTTP preview route and wakes stopped sandboxes on demand.
@@ -8,16 +8,16 @@
 #             reapers and the wake path.
 #
 # Per-sandbox containers are NOT services here — sandboxd launches them
-# at runtime from the prebuilt ${SANDBOXED_IMAGE}. They join the same
-# ${SANDBOXED_NETWORK} so Traefik can route to them.
+# at runtime from the prebuilt ${SANDBOXD_IMAGE}. They join the same
+# ${SANDBOXD_NETWORK} so Traefik can route to them.
 #
 # Everything is parameterised from .env (see .env.example).
 
 networks:
-  sandboxed_net:
+  sandboxd_net:
     # Explicit name so the literal string also works as the --network
     # value sandboxd passes to `docker run` for each sandbox.
-    name: ${SANDBOXED_NETWORK:-sandboxed_net}
+    name: ${SANDBOXD_NETWORK:-sandboxd_net}
 
 services:
   traefik:
@@ -43,46 +43,46 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic:/etc/traefik/dynamic:ro
-      - ${SANDBOXED_LOG_DIR:-/var/lib/sandboxed/log}:${SANDBOXED_LOG_DIR:-/var/lib/sandboxed/log}
+      - ${SANDBOXD_LOG_DIR:-/var/lib/sandboxed/log}:${SANDBOXD_LOG_DIR:-/var/lib/sandboxed/log}
     networks:
-      - sandboxed_net
+      - sandboxd_net
 
   sandboxd:
     build:
       context: ./control-plane
-    image: sandboxed-control-plane:1.0.0
+    image: sandboxd-control-plane:1.0.0
     restart: unless-stopped
     userns_mode: "host"  # see traefik above
     # Reachable on the internal network as http://sandboxd:9000. The API
     # is also published to the loopback for local use / the upstream
-    # backend; change SANDBOXED_API_BIND in .env if 127.0.0.1:9090 clashes.
+    # backend; change SANDBOXD_API_BIND in .env if 127.0.0.1:9090 clashes.
     ports:
-      - "${SANDBOXED_API_BIND:-127.0.0.1:9090}:9000"
+      - "${SANDBOXD_API_BIND:-127.0.0.1:9090}:9000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # Symmetric data-dir mount: the path sandboxd writes is ALSO a valid
       # host path, so the sibling `docker run -v <workspace>:/home/sandbox`
       # resolves on the host daemon. Do not change one side without the other.
-      - ${SANDBOXED_DATA_DIR:-/var/lib/sandboxed}:${SANDBOXED_DATA_DIR:-/var/lib/sandboxed}
-      - ${SANDBOXED_LOG_DIR:-/var/lib/sandboxed/log}:${SANDBOXED_LOG_DIR:-/var/lib/sandboxed/log}
+      - ${SANDBOXD_DATA_DIR:-/var/lib/sandboxed}:${SANDBOXD_DATA_DIR:-/var/lib/sandboxed}
+      - ${SANDBOXD_LOG_DIR:-/var/lib/sandboxed/log}:${SANDBOXD_LOG_DIR:-/var/lib/sandboxed/log}
     environment:
       # --- core ---
       PREVIEW_DOMAIN: ${PREVIEW_DOMAIN:-localhost}
-      SANDBOXD_IMAGE: ${SANDBOXED_IMAGE:-sandboxed-base:1.0.0}
-      SANDBOXED_NETWORK: ${SANDBOXED_NETWORK:-sandboxed_net}
-      SANDBOXED_USERNS: ${SANDBOXED_USERNS:-host}
-      SANDBOXED_DATA_DIR: ${SANDBOXED_DATA_DIR:-/var/lib/sandboxed}
-      SANDBOXED_LOG_DIR: ${SANDBOXED_LOG_DIR:-/var/lib/sandboxed/log}
-      SANDBOXD_ACCESS_LOG: ${SANDBOXED_LOG_DIR:-/var/lib/sandboxed/log}/traefik-access.log
+      SANDBOXD_IMAGE: ${SANDBOXD_IMAGE:-sandboxd-base:1.0.0}
+      SANDBOXD_NETWORK: ${SANDBOXD_NETWORK:-sandboxd_net}
+      SANDBOXD_USERNS: ${SANDBOXD_USERNS:-host}
+      SANDBOXD_DATA_DIR: ${SANDBOXD_DATA_DIR:-/var/lib/sandboxed}
+      SANDBOXD_LOG_DIR: ${SANDBOXD_LOG_DIR:-/var/lib/sandboxed/log}
+      SANDBOXD_ACCESS_LOG: ${SANDBOXD_LOG_DIR:-/var/lib/sandboxed/log}/traefik-access.log
       # --- routing (HTTP by default) ---
       PREVIEW_ENTRYPOINT: ${PREVIEW_ENTRYPOINT:-web}
       PREVIEW_TLS: ${PREVIEW_TLS:-false}
       # --- portability toggles ---
-      SANDBOXED_SET_MEMORY_HIGH: ${SANDBOXED_SET_MEMORY_HIGH:-false}
+      SANDBOXD_SET_MEMORY_HIGH: ${SANDBOXD_SET_MEMORY_HIGH:-false}
       # --- auth (open by default for local use; set tokens for prod) ---
       SANDBOXD_API_AUTH_DISABLED: ${SANDBOXD_API_AUTH_DISABLED:-true}
       SANDBOXD_API_TOKENS: ${SANDBOXD_API_TOKENS:-}
       # --- idle lifecycle (override if you like) ---
       SANDBOXD_IDLE_THRESHOLD_SECONDS: ${SANDBOXD_IDLE_THRESHOLD_SECONDS:-2100}
     networks:
-      - sandboxed_net
+      - sandboxd_net

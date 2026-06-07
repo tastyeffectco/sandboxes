@@ -9,7 +9,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/sandboxed/control-plane/internal/audit"
+	"github.com/sandboxd/control-plane/internal/audit"
 )
 
 // PUT /v1/sandboxes/{id}/files?path=<rel> — atomic generic file write.

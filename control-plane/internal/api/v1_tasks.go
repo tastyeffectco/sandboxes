@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/sandboxed/control-plane/internal/audit"
-	"github.com/sandboxed/control-plane/internal/runtime"
-	"github.com/sandboxed/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/audit"
+	"github.com/sandboxd/control-plane/internal/runtime"
+	"github.com/sandboxd/control-plane/internal/store"
 )
 
 // runtimeClientFor builds a runtime.Client for a sandbox's runtimed.

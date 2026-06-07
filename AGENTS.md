@@ -1,7 +1,7 @@
-# AGENTS.md — operating sandboxed
+# AGENTS.md — operating sandboxd
 
 A complete, self-contained runbook for an AI agent (or a human) to install, run,
-use, and remove **sandboxed** with no outside knowledge. Commands are
+use, and remove **sandboxd** with no outside knowledge. Commands are
 copy-pasteable. Human-readable docs: [`README.md`](README.md),
 [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
@@ -21,12 +21,12 @@ wake on the next request. Workspaces persist on disk.
 
 ## Install
 ```bash
-git clone https://github.com/tastyeffectco/sandboxes.git
+git clone https://github.com/tastyeffectco/sandboxd.git
 cd sandboxes
 ./install.sh
 ```
 `install.sh` is idempotent. It: checks Docker, copies `.env.example`→`.env`,
-builds the base image (`sandboxed-base:1.0.0`) and the control plane, creates the
+builds the base image (`sandboxd-base:1.0.0`) and the control plane, creates the
 data dir, and runs `docker compose up -d`. The base-image build takes a few
 minutes the first time, then caches.
 
@@ -34,7 +34,7 @@ Configuration lives in `.env` (all keys documented in `.env.example`). The two
 you may change before installing:
 - `HTTP_PORT` (default `80`) — set to e.g. `8088` if port 80 is taken; preview
   URLs then include it.
-- `SANDBOXED_API_BIND` (default `127.0.0.1:9090`) — where the API is published.
+- `SANDBOXD_API_BIND` (default `127.0.0.1:9090`) — where the API is published.
 
 Verify it's up:
 ```bash
@@ -43,7 +43,7 @@ curl -s http://127.0.0.1:9090/readyz    # -> ready
 ```
 
 ## Core API
-Base URL = `http://${SANDBOXED_API_BIND}` (default `http://127.0.0.1:9090`).
+Base URL = `http://${SANDBOXD_API_BIND}` (default `http://127.0.0.1:9090`).
 Auth is **off by default** (local). If you set `SANDBOXD_API_AUTH_DISABLED=false`
 + `SANDBOXD_API_TOKENS=name:secret`, add `-H "Authorization: Bearer secret"`.
 
@@ -114,7 +114,7 @@ docker exec -it -e ANTHROPIC_API_KEY=sk-ant-... s-$ID bash   # then: claude
 docker compose logs -f sandboxd   # control-plane logs
 docker compose ps                 # stack status
 docker compose restart sandboxd   # restart control plane
-docker ps --filter label=sandboxed.managed=true   # list running sandboxes
+docker ps --filter label=sandboxd.managed=true   # list running sandboxes
 ```
 
 ## Uninstall
@@ -136,4 +136,4 @@ docker ps --filter label=sandboxed.managed=true   # list running sandboxes
 - **Preview shows "Spinning up your app…"** — the sandbox was stopped and is
   waking; it also shows if nothing is listening on the requested port yet.
 - **Seeding/permission errors on create** — the daemon likely uses
-  `userns-remap`; keep the default `SANDBOXED_USERNS=host`.
+  `userns-remap`; keep the default `SANDBOXD_USERNS=host`.

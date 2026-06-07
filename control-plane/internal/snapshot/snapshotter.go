@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/metrics"
+	"github.com/sandboxd/control-plane/internal/metrics"
 )
 
 // Snapshotter is the hourly auto-snapshot goroutine. roadmap §9:

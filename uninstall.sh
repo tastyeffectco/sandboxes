@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# sandboxed — uninstaller.
+# sandboxd — uninstaller.
 #
 #   ./uninstall.sh                 stop the stack + remove all sandboxes + network
 #   ./uninstall.sh --images        also remove the built Docker images
@@ -8,9 +8,9 @@
 #   ./uninstall.sh --all           --images + --data (full removal)
 #   ./uninstall.sh --all --yes     full removal, no confirmation prompt
 #
-# Safe by default: it removes only what sandboxed created (containers
-# carrying the `sandboxed.managed=true` label, plus the compose stack and
-# network). Your workspaces under SANDBOXED_DATA_DIR are KEPT unless you
+# Safe by default: it removes only what sandboxd created (containers
+# carrying the `sandboxd.managed=true` label, plus the compose stack and
+# network). Your workspaces under SANDBOXD_DATA_DIR are KEPT unless you
 # pass --data / --all. It never touches the git checkout itself.
 
 set -euo pipefail
@@ -44,11 +44,11 @@ else COMPOSE=""; fi
 
 # Load .env (if present) for the data dir / image names.
 [ -f .env ] && { set -a; . ./.env; set +a; }
-DATA_DIR="${SANDBOXED_DATA_DIR:-/var/lib/sandboxed}"
-BASE_IMAGE="${SANDBOXED_IMAGE:-sandboxed-base:1.0.0}"
-CP_IMAGE="sandboxed-control-plane:1.0.0"
+DATA_DIR="${SANDBOXD_DATA_DIR:-/var/lib/sandboxed}"
+BASE_IMAGE="${SANDBOXD_IMAGE:-sandboxd-base:1.0.0}"
+CP_IMAGE="sandboxd-control-plane:1.0.0"
 
-bold "sandboxed — uninstall"
+bold "sandboxd — uninstall"
 
 # 1. Stop + remove the compose stack (traefik + sandboxd) and its network.
 if [ -n "$COMPOSE" ]; then
@@ -56,8 +56,8 @@ if [ -n "$COMPOSE" ]; then
 fi
 
 # 2. Remove every sandbox container this stack created. Scoped precisely
-#    by the sandboxed.managed label so nothing else on the host is touched.
-SANDBOXES=$($DOCKER ps -aq --filter "label=sandboxed.managed=true" 2>/dev/null || true)
+#    by the sandboxd.managed label so nothing else on the host is touched.
+SANDBOXES=$($DOCKER ps -aq --filter "label=sandboxd.managed=true" 2>/dev/null || true)
 if [ -n "$SANDBOXES" ]; then
   echo "$SANDBOXES" | xargs -r $DOCKER rm -f >/dev/null
   ok "removed sandbox containers: $(echo "$SANDBOXES" | wc -l | tr -d ' ')"
@@ -66,7 +66,7 @@ else
 fi
 
 # 3. Remove the network if it lingers.
-NET="${SANDBOXED_NETWORK:-sandboxed_net}"
+NET="${SANDBOXD_NETWORK:-sandboxd_net}"
 $DOCKER network rm "$NET" >/dev/null 2>&1 && ok "removed network $NET" || true
 
 # 4. Optionally remove images.
