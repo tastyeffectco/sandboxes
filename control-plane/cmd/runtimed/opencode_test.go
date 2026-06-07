@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sandboxed/control-plane/internal/runtime"
+	"github.com/sandboxd/control-plane/internal/runtime"
 )
 
 // captured records the (type, data) of every event the parser emits,

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/metrics"
+	"github.com/sandboxd/control-plane/internal/metrics"
 )
 
 // RefreshWatcher observes the two systemd oneshot units that refresh

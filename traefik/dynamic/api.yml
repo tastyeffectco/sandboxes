@@ -1,7 +1,7 @@
 # Optional: expose the sandboxd control-plane API through Traefik at
 #   http://api.preview.<domain>
 # (e.g. http://api.preview.localhost). The API is also published on the
-# loopback by the compose file (SANDBOXED_API_BIND, default
+# loopback by the compose file (SANDBOXD_API_BIND, default
 # 127.0.0.1:9090) — this router is for reaching it over the edge.
 #
 # sandboxd's own auth applies: when SANDBOXD_API_AUTH_DISABLED=false and

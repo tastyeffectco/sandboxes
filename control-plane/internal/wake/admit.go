@@ -8,7 +8,7 @@ import (
 	"context"
 	"sync/atomic"
 
-	"github.com/sandboxed/control-plane/internal/reaper"
+	"github.com/sandboxd/control-plane/internal/reaper"
 )
 
 // AdmitConfig parametrises the admission function. Defaults mirror

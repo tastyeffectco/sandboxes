@@ -1,6 +1,6 @@
 # sandboxd — control plane
 
-The Go control plane for [sandboxed](../README.md). A single binary that drives
+The Go control plane for [sandboxd](../README.md). A single binary that drives
 the Docker daemon (via the `docker` CLI), stores state in SQLite, runs the idle
 and pressure reapers, and serves the HTTP API and the wake path.
 
@@ -44,11 +44,11 @@ from `../.env`. The ones the OSS build adds or changes:
 | `PREVIEW_DOMAIN` | `localhost` | domain preview URLs hang off |
 | `PREVIEW_ENTRYPOINT` | `web` | Traefik entrypoint on preview routers |
 | `PREVIEW_TLS` | `false` | emit `tls=true` on preview routers |
-| `SANDBOXED_NETWORK` | `sandboxed_net` | docker network sandboxes join |
-| `SANDBOXED_USERNS` | `host` | `--userns` for sandboxes + the seed container |
-| `SANDBOXED_DATA_DIR` | `/var/lib/sandboxed` | workspaces + SQLite + logs |
-| `SANDBOXED_SET_MEMORY_HIGH` | `false` | write cgroup `memory.high` (needs host cgroup access) |
-| `SANDBOXD_IMAGE` | `sandboxed-base:1.0.0` | per-sandbox base image |
+| `SANDBOXD_NETWORK` | `sandboxd_net` | docker network sandboxes join |
+| `SANDBOXD_USERNS` | `host` | `--userns` for sandboxes + the seed container |
+| `SANDBOXD_DATA_DIR` | `/var/lib/sandboxed` | workspaces + SQLite + logs |
+| `SANDBOXD_SET_MEMORY_HIGH` | `false` | write cgroup `memory.high` (needs host cgroup access) |
+| `SANDBOXD_IMAGE` | `sandboxd-base:1.0.0` | per-sandbox base image |
 | `SANDBOXD_API_AUTH_DISABLED` | `true` | open API for local use |
 | `SANDBOXD_API_TOKENS` | — | `name:secret` pairs for service-token auth |
 | `SANDBOXD_IDLE_THRESHOLD_SECONDS` | `2100` | idle window before `docker stop` |

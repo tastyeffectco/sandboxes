@@ -16,8 +16,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/metrics"
-	"github.com/sandboxed/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/metrics"
+	"github.com/sandboxd/control-plane/internal/store"
 )
 
 // Tailer reads Traefik's JSON access log and, for each line whose

@@ -10,7 +10,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/sandboxed/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/store"
 )
 
 // Registry is the package-level Prometheus registry.

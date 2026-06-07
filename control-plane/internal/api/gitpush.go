@@ -23,7 +23,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/metrics"
+	"github.com/sandboxd/control-plane/internal/metrics"
 )
 
 const gitPushTimeout = 90 * time.Second
@@ -111,7 +111,7 @@ func (s *Server) pushOnTaskFinish(sandboxID, taskID string) {
 	// 2. commit only if there are staged changes.
 	if _, err := git("diff", "--cached", "--quiet"); err != nil {
 		if out, cerr := git(
-			"-c", "user.email=sandboxd@sandboxed.local",
+			"-c", "user.email=sandboxd@sandboxd.local",
 			"-c", "user.name=sandboxd",
 			"commit", "-m", "task "+taskID); cerr != nil {
 			log.Warn("git push: commit failed", "out", out)

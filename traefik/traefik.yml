@@ -1,4 +1,4 @@
-# sandboxed — Traefik v3 static configuration (OSS / docker-native).
+# sandboxd — Traefik v3 static configuration (OSS / docker-native).
 #
 # Plain HTTP by default: browsers resolve any *.localhost name to
 # 127.0.0.1, so preview URLs like
@@ -26,13 +26,13 @@ providers:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
     # Only route containers this distribution manages. sandboxd emits the
-    # `sandboxed.managed=true` label on every sandbox it creates, so this
+    # `sandboxd.managed=true` label on every sandbox it creates, so this
     # Traefik never touches unrelated containers that happen to share the
     # daemon (including another Traefik's, or a different stack's).
-    constraints: "Label(`sandboxed.managed`,`true`)"
+    constraints: "Label(`sandboxd.managed`,`true`)"
     # The network sandboxes (and this Traefik) share. Must match
-    # SANDBOXED_NETWORK / the compose network name.
-    network: sandboxed_net
+    # SANDBOXD_NETWORK / the compose network name.
+    network: sandboxd_net
   file:
     directory: /etc/traefik/dynamic
     watch: true
@@ -44,7 +44,7 @@ log:
 accessLog:
   # Written to a path bind-mounted into BOTH traefik and sandboxd so the
   # control plane's tailer can read RequestHost lines and keep sandboxes
-  # marked active. Must match SANDBOXED_LOG_DIR / SANDBOXD_ACCESS_LOG.
+  # marked active. Must match SANDBOXD_LOG_DIR / SANDBOXD_ACCESS_LOG.
   filePath: /var/lib/sandboxed/log/traefik-access.log
   format: json
   bufferingSize: 0

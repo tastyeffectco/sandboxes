@@ -1,6 +1,6 @@
 # Architecture
 
-sandboxed is a small Go control plane (`sandboxd`) that drives the Docker
+sandboxd is a small Go control plane (`sandboxd`) that drives the Docker
 daemon, fronted by Traefik. Everything runs as containers on one host.
 
 ```
@@ -24,7 +24,7 @@ data directory mounted. It:
 - **Owns sandbox lifecycle** — create / list / get / exec / stop / destroy. It
   shells out to the `docker` CLI (`internal/docker`); no SDK.
 - **Provisions workspaces** (`internal/loopback`) — one directory per sandbox
-  under `SANDBOXED_DATA_DIR/workspaces/<id>`, seeded once from the image's
+  under `SANDBOXD_DATA_DIR/workspaces/<id>`, seeded once from the image's
   `/opt/sandbox-skel`, then bind-mounted into the container at `/home/sandbox`.
 - **Emits Traefik labels** (`internal/traefik`) so each sandbox self-registers
   its preview route(s) when it starts.
@@ -46,7 +46,7 @@ supervises the user's dev server and runs coding tasks submitted through the
 API. It's compiled in the base image's build stage, so the host needs no Go.
 
 ### Traefik (edge)
-Docker label provider, scoped by a `sandboxed.managed=true` constraint so it
+Docker label provider, scoped by a `sandboxd.managed=true` constraint so it
 only routes containers this stack owns. Running sandboxes win on a
 priority-100 router; the priority-1 file-provider catch-all (`traefik/dynamic/
 wake.yml`) forwards anything else to sandboxd's wake path. Plain HTTP by
@@ -69,15 +69,15 @@ Each sandbox runs under hardened `runc`: `--cap-drop=ALL`,
 `/tmp`, a hard `--memory` ceiling, `--pids-limit`, and file-descriptor ulimits.
 The threat model is **authenticated, accountable users running their own code**
 — not anonymous hostile multi-tenancy. Kernel-CVE container escape is mitigated
-by patching, not by a VM boundary; if you need stronger isolation, run sandboxed
+by patching, not by a VM boundary; if you need stronger isolation, run sandboxd
 on a dedicated VM per trust domain.
 
 ## Storage & persistence
 
 | Class | Where | Survives stop? | Survives reboot? |
 |---|---|---|---|
-| Workspace | `SANDBOXED_DATA_DIR/workspaces/<id>/` (bind mount) | yes | yes |
-| Control-plane state | `SANDBOXED_DATA_DIR/state/sandboxd.db` (SQLite) | yes | yes |
+| Workspace | `SANDBOXD_DATA_DIR/workspaces/<id>/` (bind mount) | yes | yes |
+| Control-plane state | `SANDBOXD_DATA_DIR/state/sandboxd.db` (SQLite) | yes | yes |
 | Container writable layer | none (`--read-only`) | no | no |
 | `/tmp`, `/var/tmp` | tmpfs | no | no |
 
@@ -86,14 +86,14 @@ workspace by copying its directory; back up state by copying the SQLite file.
 
 ## Design choices & current limitations (v1)
 
-sandboxed v1 optimizes for "runs anywhere with just Docker, one command." A few
+sandboxd v1 optimizes for "runs anywhere with just Docker, one command." A few
 mechanisms are deliberately simple so there's nothing host-specific to install
 or configure. Each is a conscious trade-off you can tighten later:
 
 | Area | v1 choice | Trade-off / how to harden |
 |---|---|---|
 | Workspace storage | plain **directory** per sandbox | no hard per-workspace disk quota (host fs is shared); add quotas at the fs/volume layer if needed |
-| Memory | hard `--memory` ceiling per sandbox | the softer cgroup `memory.high` throttle is opt-in (`SANDBOXED_SET_MEMORY_HIGH`, needs host cgroup access) |
+| Memory | hard `--memory` ceiling per sandbox | the softer cgroup `memory.high` throttle is opt-in (`SANDBOXD_SET_MEMORY_HIGH`, needs host cgroup access) |
 | Egress | default-allow, no logging | add host firewall rules / a proxy if you need egress control |
 | Package installs | public npm/PyPI registries | run your own caching proxy and point the image at it for speed/airgap |
 | TLS / domain | HTTP on `*.localhost` out of the box | switch to a real wildcard domain + cert resolver (see README → Production / TLS) |
@@ -101,5 +101,5 @@ or configure. Each is a conscious trade-off you can tighten later:
 
 `--userns=host` is set on the infra containers (and, by default, on sandboxes)
 so workspace ownership is deterministic whether or not the host daemon uses
-userns-remap. Set `SANDBOXED_USERNS=` empty to opt sandboxes back into the
+userns-remap. Set `SANDBOXD_USERNS=` empty to opt sandboxes back into the
 daemon default.

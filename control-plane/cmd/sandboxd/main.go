@@ -1,4 +1,4 @@
-// sandboxd — control plane for the sandboxed.
+// sandboxd — control plane for the sandboxd.
 //
 // CLAUDE.md control-plane scope: "Single Go binary, ~500–800 LOC
 // target. Binds to 127.0.0.1 only. No auth in v1 (introduced in
@@ -30,37 +30,37 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/activity"
-	"github.com/sandboxed/control-plane/internal/api"
-	"github.com/sandboxed/control-plane/internal/audit"
-	"github.com/sandboxed/control-plane/internal/auth"
-	"github.com/sandboxed/control-plane/internal/docker"
-	"github.com/sandboxed/control-plane/internal/egress"
-	"github.com/sandboxed/control-plane/internal/idlock"
-	"github.com/sandboxed/control-plane/internal/logging"
-	"github.com/sandboxed/control-plane/internal/loopback"
-	"github.com/sandboxed/control-plane/internal/metrics"
-	nginxwatch "github.com/sandboxed/control-plane/internal/nginx"
-	"github.com/sandboxed/control-plane/internal/reaper"
-	"github.com/sandboxed/control-plane/internal/reconcile"
-	"github.com/sandboxed/control-plane/internal/snapshot"
-	"github.com/sandboxed/control-plane/internal/store"
-	"github.com/sandboxed/control-plane/internal/wake"
+	"github.com/sandboxd/control-plane/internal/activity"
+	"github.com/sandboxd/control-plane/internal/api"
+	"github.com/sandboxd/control-plane/internal/audit"
+	"github.com/sandboxd/control-plane/internal/auth"
+	"github.com/sandboxd/control-plane/internal/docker"
+	"github.com/sandboxd/control-plane/internal/egress"
+	"github.com/sandboxd/control-plane/internal/idlock"
+	"github.com/sandboxd/control-plane/internal/logging"
+	"github.com/sandboxd/control-plane/internal/loopback"
+	"github.com/sandboxd/control-plane/internal/metrics"
+	nginxwatch "github.com/sandboxd/control-plane/internal/nginx"
+	"github.com/sandboxd/control-plane/internal/reaper"
+	"github.com/sandboxd/control-plane/internal/reconcile"
+	"github.com/sandboxd/control-plane/internal/snapshot"
+	"github.com/sandboxd/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/wake"
 )
 
 const (
 	// OSS default: sandboxd runs in its own container and Traefik
 	// reaches it over the compose network by service name, so it binds
 	// all interfaces (it is NOT published to the host — only reachable
-	// on the internal sandboxed_net). Override with SANDBOXD_ADDR.
+	// on the internal sandboxd_net). Override with SANDBOXD_ADDR.
 	defaultListenAddr = "0.0.0.0:9000"
-	defaultImage      = "sandboxed-base:1.0.0"
+	defaultImage      = "sandboxd-base:1.0.0"
 	migrationsDir     = "/usr/local/share/sandboxd/migrations"
 
 	// Default data root for the portable build. The compose file
 	// bind-mounts this path host:container symmetric, so it is a valid
 	// host path for the sibling `docker run -v`. Override with
-	// SANDBOXED_DATA_DIR / SANDBOXED_LOG_DIR (paths derived in main()).
+	// SANDBOXD_DATA_DIR / SANDBOXD_LOG_DIR (paths derived in main()).
 	defaultDataDir = "/var/lib/sandboxed"
 	defaultLogDir  = "/var/log/sandboxed"
 
@@ -112,8 +112,8 @@ func main() {
 	// dataDir; the compose file bind-mounts dataDir host:container
 	// symmetric so the path sandboxd writes is also a valid host path
 	// for the sibling `docker run -v <workspace>:/home/sandbox`.
-	dataDir := envDefault("SANDBOXED_DATA_DIR", defaultDataDir)
-	logDir := envDefault("SANDBOXED_LOG_DIR", defaultLogDir)
+	dataDir := envDefault("SANDBOXD_DATA_DIR", defaultDataDir)
+	logDir := envDefault("SANDBOXD_LOG_DIR", defaultLogDir)
 	stateDir := filepath.Join(dataDir, "state")
 	dbPath := filepath.Join(stateDir, "sandboxd.db")
 	workspacesRoot := filepath.Join(dataDir, "workspaces")
@@ -124,11 +124,11 @@ func main() {
 	tailerOffsetFs := filepath.Join(stateDir, "traefik-tail.offset")
 
 	// OSS docker-native toggles (default to the portable behaviour).
-	network := os.Getenv("SANDBOXED_NETWORK")              // shared docker network for Traefik routing
-	userns := envDefault("SANDBOXED_USERNS", "host")       // sandbox + seed --userns; "host" is deterministic on any daemon
+	network := os.Getenv("SANDBOXD_NETWORK")              // shared docker network for Traefik routing
+	userns := envDefault("SANDBOXD_USERNS", "host")       // sandbox + seed --userns; "host" is deterministic on any daemon
 	previewEntrypoint := envDefault("PREVIEW_ENTRYPOINT", "web")
 	previewTLS := boolFromEnv("PREVIEW_TLS", false)
-	setMemoryHigh := boolFromEnv("SANDBOXED_SET_MEMORY_HIGH", false)
+	setMemoryHigh := boolFromEnv("SANDBOXD_SET_MEMORY_HIGH", false)
 
 	migrations := envDefault("SANDBOXD_MIGRATIONS", migrationsDir)
 	if _, err := os.Stat(migrations); err != nil {
@@ -480,8 +480,8 @@ func main() {
 	// for npm/pypi/crates/bun and hot-reloaded it on config change. The
 	// OSS image points package managers at the public registries
 	// directly, so there is no proxy container to watch. Re-enable by
-	// running your own proxy and setting SANDBOXED_NGINX_WATCH_PATHS +
-	// SANDBOXED_NGINX_CONTAINER (the watcher code is retained).
+	// running your own proxy and setting SANDBOXD_NGINX_WATCH_PATHS +
+	// SANDBOXD_NGINX_CONTAINER (the watcher code is retained).
 	_ = nginxwatch.ExecResult{} // keep the import referenced
 
 	// --- Auto-snapshotter: DISABLED in the OSS build ------------------

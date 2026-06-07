@@ -48,11 +48,11 @@ func Labels(id string, ports []int, domain, visibility, entrypoint string, tls b
 	if entrypoint == "" {
 		entrypoint = "web"
 	}
-	// `sandboxed.managed=true` lets this distribution's Traefik scope its
+	// `sandboxd.managed=true` lets this distribution's Traefik scope its
 	// docker provider with a constraint so it only ever routes sandboxes
-	// it owns — important when sandboxed shares a Docker daemon with
+	// it owns — important when sandboxd shares a Docker daemon with
 	// other Traefik-labelled containers. See traefik/traefik.yml.
-	out := []string{"traefik.enable=true", "sandboxed.managed=true"}
+	out := []string{"traefik.enable=true", "sandboxd.managed=true"}
 	for _, p := range ports {
 		router := fmt.Sprintf("s-%s-%d", id, p)
 		host := fmt.Sprintf("s-%s-%d.preview.%s", id, p, domain)

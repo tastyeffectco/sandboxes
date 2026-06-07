@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/runtime"
+	"github.com/sandboxd/control-plane/internal/runtime"
 )
 
 const (

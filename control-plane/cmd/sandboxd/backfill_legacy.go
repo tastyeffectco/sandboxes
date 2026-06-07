@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/logging"
-	"github.com/sandboxed/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/logging"
+	"github.com/sandboxd/control-plane/internal/store"
 )
 
 // runBackfillLegacy implements the one-shot subcommand
@@ -50,7 +50,7 @@ func runBackfillLegacy(args []string) int {
 			}
 		}
 	}
-	dataDir := envDefault("SANDBOXED_DATA_DIR", defaultDataDir)
+	dataDir := envDefault("SANDBOXD_DATA_DIR", defaultDataDir)
 	workspacesRoot := filepath.Join(dataDir, "workspaces")
 	dsn := fmt.Sprintf("file:%s?_journal=WAL&_busy_timeout=5000&_fk=1",
 		envDefault("SANDBOXD_DB", filepath.Join(dataDir, "state", "sandboxd.db")))

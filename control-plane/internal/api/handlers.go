@@ -15,17 +15,17 @@ import (
 
 	"github.com/oklog/ulid/v2"
 
-	"github.com/sandboxed/control-plane/internal/audit"
-	"github.com/sandboxed/control-plane/internal/auth"
-	"github.com/sandboxed/control-plane/internal/cgroup"
-	"github.com/sandboxed/control-plane/internal/docker"
-	"github.com/sandboxed/control-plane/internal/logging"
-	"github.com/sandboxed/control-plane/internal/metrics"
-	"github.com/sandboxed/control-plane/internal/runtime"
-	"github.com/sandboxed/control-plane/internal/snapshot"
-	"github.com/sandboxed/control-plane/internal/store"
-	"github.com/sandboxed/control-plane/internal/traefik"
-	"github.com/sandboxed/control-plane/internal/wake"
+	"github.com/sandboxd/control-plane/internal/audit"
+	"github.com/sandboxd/control-plane/internal/auth"
+	"github.com/sandboxd/control-plane/internal/cgroup"
+	"github.com/sandboxd/control-plane/internal/docker"
+	"github.com/sandboxd/control-plane/internal/logging"
+	"github.com/sandboxd/control-plane/internal/metrics"
+	"github.com/sandboxd/control-plane/internal/runtime"
+	"github.com/sandboxd/control-plane/internal/snapshot"
+	"github.com/sandboxd/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/traefik"
+	"github.com/sandboxd/control-plane/internal/wake"
 )
 
 // --- request / response payloads ------------------------------------

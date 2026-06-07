@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sandboxed/control-plane/internal/store"
+	"github.com/sandboxd/control-plane/internal/store"
 )
 
 // Poller scrapes Traefik's Prometheus metrics endpoint and bumps

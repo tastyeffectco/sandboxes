@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.6
 #
-# sandboxd — the sandboxed control plane.
+# sandboxd — the sandboxd control plane.
 #
 # Two stages: a CGO build (sandboxd uses mattn/go-sqlite3, which needs
 # cgo + a C toolchain), then a slim runtime that carries the docker CLI
