@@ -200,6 +200,11 @@ from 80). The first request to a stopped sandbox **wakes it** automatically. On 
 real domain you get `https://s-<id>-3000.preview.yourdomain.com`
 (see [Production / TLS](#production--tls)).
 
+> **Rancher Desktop / Docker Desktop + k3s:** these bundle a k3s cluster whose
+> klipper-lb grabs port 80 before sandboxd's Traefik can, so preview URLs return
+> 404. Fix: set `HTTP_PORT=8080` in `.env` and run `docker compose up -d traefik`.
+> Preview URLs become `http://s-<id>-<port>.preview.localhost:8080`.
+
 > **Just want a shell, no agent?** Skip step 2 and run anything via the exec API:
 > `curl -XPOST $API/sandbox/$ID/exec -d '{"cmd":["bash","-lc","cd ~/workspace/app && python3 -m http.server 3000"]}'`
 > then open the same preview URL.
