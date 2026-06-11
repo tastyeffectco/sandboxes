@@ -42,6 +42,11 @@ type Sandbox struct {
 	// (migrations/0003_container_ip.sql). NULL while stopped.
 	ContainerIP sql.NullString
 
+	// idle_policy controls the idle reaper's behaviour for this sandbox
+	// (migrations/0011_idle_policy.sql). 'sleep' (default) = idle-stop +
+	// wake-on-request; 'always_on' = never idle-stopped.
+	IdlePolicy string
+
 	// Phase 8 — external identity passthrough + visibility
 	// (migrations/0004_external_identity.sql). The external_* columns
 	// are opaque upstream identifiers sandboxd never interprets beyond
@@ -130,7 +135,8 @@ func (s *Store) Get(ctx context.Context, id string) (*Sandbox, error) {
 		       created_at, updated_at,
 		       last_active_at, stopped_at, keepalive_until,
 		       container_ip,
-		       external_user_id, external_project_id, external_workspace_id, visibility
+		       external_user_id, external_project_id, external_workspace_id, visibility,
+		       idle_policy
 		  FROM sandbox WHERE id = ?`, id)
 	sb, err := scanSandbox(row)
 	if err != nil {
@@ -167,7 +173,8 @@ func (s *Store) List(ctx context.Context) ([]*Sandbox, error) {
 		       created_at, updated_at,
 		       last_active_at, stopped_at, keepalive_until,
 		       container_ip,
-		       external_user_id, external_project_id, external_workspace_id, visibility
+		       external_user_id, external_project_id, external_workspace_id, visibility,
+		       idle_policy
 		  FROM sandbox ORDER BY created_at DESC`)
 	if err != nil {
 		return nil, err
@@ -202,7 +209,8 @@ func (s *Store) ListByStatuses(ctx context.Context, statuses ...string) ([]*Sand
 	             created_at, updated_at,
 	             last_active_at, stopped_at, keepalive_until,
 	             container_ip,
-	             external_user_id, external_project_id, external_workspace_id, visibility
+	             external_user_id, external_project_id, external_workspace_id, visibility,
+	             idle_policy
 	        FROM sandbox WHERE status IN (?`
 	args := make([]any, 0, len(statuses))
 	args = append(args, statuses[0])
@@ -246,9 +254,10 @@ func (s *Store) ListIdleCandidates(ctx context.Context, cutoff time.Time) ([]*Sa
 		       created_at, updated_at,
 		       last_active_at, stopped_at, keepalive_until,
 		       container_ip,
-		       external_user_id, external_project_id, external_workspace_id, visibility
+		       external_user_id, external_project_id, external_workspace_id, visibility,
+		       idle_policy
 		  FROM sandbox
-		 WHERE status='running' AND last_active_at < ?
+		 WHERE status='running' AND last_active_at < ? AND idle_policy != 'always_on'
 		 ORDER BY last_active_at ASC`, cutoff.Unix())
 	if err != nil {
 		return nil, err
@@ -298,6 +307,7 @@ func scanSandbox(s scanner) (*Sandbox, error) {
 		&lastActiveUnix, &sb.StoppedAt, &sb.KeepaliveUntil,
 		&sb.ContainerIP,
 		&sb.ExternalUserID, &sb.ExternalProjectID, &sb.ExternalWorkspaceID, &sb.Visibility,
+		&sb.IdlePolicy,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
@@ -310,6 +320,9 @@ func scanSandbox(s scanner) (*Sandbox, error) {
 	if lastActiveUnix > 0 {
 		sb.LastActiveAt = time.Unix(lastActiveUnix, 0).UTC()
 	}
+	if sb.IdlePolicy == "" {
+		sb.IdlePolicy = "sleep"
+	}
 	return sb, nil
 }
 
@@ -320,7 +333,8 @@ const sandboxSelectCols = `id, status, image, workspace_img, workspace_mnt,
 	       created_at, updated_at,
 	       last_active_at, stopped_at, keepalive_until,
 	       container_ip,
-	       external_user_id, external_project_id, external_workspace_id, visibility`
+	       external_user_id, external_project_id, external_workspace_id, visibility,
+	       idle_policy`
 
 // ListFiltered returns sandbox rows filtered by external_user_id and/
 // or external_project_id. An empty string for either filter means "do

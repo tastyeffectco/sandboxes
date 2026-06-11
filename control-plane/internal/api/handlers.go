@@ -68,6 +68,12 @@ type createReq struct {
 	// `docker run --env`; keys must be non-empty and free of '=' and
 	// newlines.
 	Env map[string]string `json:"env,omitempty"`
+	// IdlePolicy controls how the reapers treat this sandbox.
+	//   'sleep' (default): idle-stopped after the global threshold; wakes on request.
+	//   'always_on': never idle-stopped, and exempt from moderate memory-pressure
+	//   reaping. NOTE: still stoppable under critical host pressure (<5% mem
+	//   available), and not auto-restarted if stopped.
+	IdlePolicy string `json:"idle_policy,omitempty"`
 }
 
 type sandboxResp struct {
@@ -99,6 +105,7 @@ type sandboxResp struct {
 	ExternalProjectID   string `json:"external_project_id,omitempty"`
 	ExternalWorkspaceID string `json:"external_workspace_id,omitempty"`
 	Visibility          string `json:"visibility"`
+	IdlePolicy          string `json:"idle_policy"`
 }
 
 type getResp struct {
@@ -166,6 +173,10 @@ func toRespRow(sb *store.Sandbox) sandboxResp {
 	r.Visibility = sb.Visibility
 	if r.Visibility == "" {
 		r.Visibility = "public"
+	}
+	r.IdlePolicy = sb.IdlePolicy
+	if r.IdlePolicy == "" {
+		r.IdlePolicy = "sleep"
 	}
 	return r
 }
@@ -325,6 +336,14 @@ func (s *Server) handleCreate(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, "visibility must be 'public' or 'private'")
 		return
 	}
+	idlePolicy := req.IdlePolicy
+	if idlePolicy == "" {
+		idlePolicy = "sleep"
+	}
+	if idlePolicy != "sleep" && idlePolicy != "always_on" {
+		writeErr(w, http.StatusBadRequest, "idle_policy must be 'sleep' or 'always_on'")
+		return
+	}
 	if req.GitRemoteURL != "" && !strings.HasPrefix(req.GitRemoteURL, "https://") {
 		writeErr(w, http.StatusBadRequest, "git_remote_url must be an https:// URL")
 		return
@@ -431,6 +450,7 @@ func (s *Server) handleCreate(w http.ResponseWriter, r *http.Request) {
 		MemoryHigh:          req.MemoryHigh,
 		Ports:               req.Ports,
 		Visibility:          visibility,
+		IdlePolicy:          idlePolicy,
 		ExternalUserID:      nullStr(req.External.UserID),
 		ExternalProjectID:   nullStr(req.External.ProjectID),
 		ExternalWorkspaceID: nullStr(req.External.WorkspaceID),

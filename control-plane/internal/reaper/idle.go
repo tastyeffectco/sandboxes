@@ -88,6 +88,10 @@ func (i *Idle) tick(ctx context.Context) error {
 		return fmt.Errorf("list idle candidates: %w", err)
 	}
 	for _, sb := range candidates {
+		// Skip rule 0: always_on policy
+		if sb.IdlePolicy == "always_on" {
+			continue
+		}
 		// Skip rule 1: in-flight exec.
 		if i.Inflight != nil && i.Inflight.Active(sb.ID) {
 			continue

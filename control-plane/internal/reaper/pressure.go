@@ -129,6 +129,9 @@ func (p *Pressure) stopOldestIdle(ctx context.Context, band string, availPct flo
 	now := time.Now().UTC()
 	// cutoff=now means "any row not currently being marked active";
 	// the skip rules below handle inflight exec / keepalive.
+	// always_on sandboxes are excluded by ListIdleCandidates' SQL filter, so
+	// moderate-pressure reaping skips them by design. The emergency path
+	// (stopHeaviestRSS) intentionally ignores idle_policy to save the host.
 	candidates, err := p.Store.ListIdleCandidates(ctx, now)
 	if err != nil {
 		p.Log.Warn("pressure reaper: list idle candidates failed", "err", err.Error())

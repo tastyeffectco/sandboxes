@@ -76,16 +76,22 @@ func (s *Store) Create(ctx context.Context, sb *Sandbox) error {
 		if visibility == "" {
 			visibility = "public"
 		}
+		idlePolicy := sb.IdlePolicy
+		if idlePolicy == "" {
+			idlePolicy = "sleep"
+		}
 		_, err = tx.ExecContext(ctx, `
 			INSERT INTO sandbox (id, status, image, workspace_img, workspace_mnt,
 			                    container_id, cgroup_path, memory_high, error_message,
 			                    created_at, updated_at,
 			                    external_user_id, external_project_id,
-			                    external_workspace_id, visibility)
-			VALUES (?, ?, ?, ?, ?, NULL, NULL, ?, NULL, ?, ?, ?, ?, ?, ?)`,
+			                    external_workspace_id, visibility,
+			                    idle_policy)
+			VALUES (?, ?, ?, ?, ?, NULL, NULL, ?, NULL, ?, ?, ?, ?, ?, ?, ?)`,
 			sb.ID, sb.Status, sb.Image, sb.WorkspaceImg, sb.WorkspaceMnt,
 			sb.MemoryHigh, now, now,
-			sb.ExternalUserID, sb.ExternalProjectID, sb.ExternalWorkspaceID, visibility)
+			sb.ExternalUserID, sb.ExternalProjectID, sb.ExternalWorkspaceID, visibility, idlePolicy)
+
 		if err != nil {
 			if isUniqueViolation(err) {
 				return ErrConflict
