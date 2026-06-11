@@ -143,9 +143,12 @@ type DropCounter struct {
 // sandbox_platform table whose comment maps to a known reason.
 //
 // nft -j output for a rule with a counter looks like:
-//   {"rule": {"expr": [...], "comment": "block abuse list", ...}}
+//
+//	{"rule": {"expr": [...], "comment": "block abuse list", ...}}
+//
 // where the expr contains a counter element:
-//   {"counter": {"packets": 123, "bytes": 4567}}
+//
+//	{"counter": {"packets": 123, "bytes": 4567}}
 //
 // We walk every rule, extract (comment, counter) where present.
 func (n *Nft) readDropCounters(ctx context.Context) ([]DropCounter, error) {

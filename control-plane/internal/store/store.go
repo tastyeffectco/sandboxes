@@ -20,18 +20,18 @@ import (
 
 // Sandbox is the in-memory mirror of a `sandbox` table row.
 type Sandbox struct {
-	ID             string
-	Status         string // creating | running | stopped | error
-	Image          string
-	WorkspaceImg   string
-	WorkspaceMnt   string
-	ContainerID    sql.NullString
-	CgroupPath     sql.NullString
-	MemoryHigh     string
-	ErrorMessage   sql.NullString
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	Ports          []int
+	ID           string
+	Status       string // creating | running | stopped | error
+	Image        string
+	WorkspaceImg string
+	WorkspaceMnt string
+	ContainerID  sql.NullString
+	CgroupPath   sql.NullString
+	MemoryHigh   string
+	ErrorMessage sql.NullString
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	Ports        []int
 
 	// Phase 5 — activity / lifecycle columns (migrations/0002_activity.sql).
 	LastActiveAt   time.Time     // bumped by tailer / poller / exec / wake; zero value if never observed
@@ -66,10 +66,10 @@ type WorkspaceOwner struct {
 
 // Store wraps an open *sql.DB plus the write-loop goroutine.
 type Store struct {
-	db       *sql.DB
-	writes   chan writeOp
-	doneCh   chan struct{}
-	closeCh  chan struct{}
+	db      *sql.DB
+	writes  chan writeOp
+	doneCh  chan struct{}
+	closeCh chan struct{}
 }
 
 // Open opens the database at dsn, applies migrations, and starts the

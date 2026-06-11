@@ -10,19 +10,19 @@ import (
 // (migrations/0009). A snapshot is a reusable, frozen copy of a
 // sandbox's workspace .img — see ops/design/snapshots-as-templates.md.
 type Snapshot struct {
-	ID               string
-	Name             string
-	OwnerToken       string         // auth.Actor.Name — the tenant boundary
-	SourceSandboxID  sql.NullString // provenance
-	CreatedByUserID  sql.NullString // untrusted passthrough; provenance only
-	BaseImage        string         // recorded, not pinned
-	Visibility       string         // 'private' in v1
-	Format           string         // 'raw' in v1
-	Status           string         // ready | error
-	ImagePath        string
-	SizeBytes        sql.NullInt64
-	ErrorMessage     sql.NullString
-	CreatedAt        time.Time
+	ID              string
+	Name            string
+	OwnerToken      string         // auth.Actor.Name — the tenant boundary
+	SourceSandboxID sql.NullString // provenance
+	CreatedByUserID sql.NullString // untrusted passthrough; provenance only
+	BaseImage       string         // recorded, not pinned
+	Visibility      string         // 'private' in v1
+	Format          string         // 'raw' in v1
+	Status          string         // ready | error
+	ImagePath       string
+	SizeBytes       sql.NullInt64
+	ErrorMessage    sql.NullString
+	CreatedAt       time.Time
 }
 
 const snapshotCols = `id, name, owner_token, source_sandbox_id, created_by_user_id,

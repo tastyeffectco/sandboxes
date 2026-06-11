@@ -16,10 +16,10 @@ import (
 // PressureConfig captures the env-tunable knobs from roadmap §12.
 // Defaults come from CLAUDE.md "Host memory pressure reaper".
 type PressureConfig struct {
-	Interval     time.Duration // SANDBOXD_PRESSURE_INTERVAL_SECONDS (10s)
-	HeadroomPct  float64       // SANDBOXD_MEM_HEADROOM_PCT          (15)
-	RefuseWakesPct float64     // SANDBOXD_MEM_REFUSE_WAKES_PCT      (10)
-	EmergencyPct float64       // SANDBOXD_MEM_EMERGENCY_PCT         (5)
+	Interval       time.Duration // SANDBOXD_PRESSURE_INTERVAL_SECONDS (10s)
+	HeadroomPct    float64       // SANDBOXD_MEM_HEADROOM_PCT          (15)
+	RefuseWakesPct float64       // SANDBOXD_MEM_REFUSE_WAKES_PCT      (10)
+	EmergencyPct   float64       // SANDBOXD_MEM_EMERGENCY_PCT         (5)
 }
 
 // Pressure is the goroutine.
@@ -29,7 +29,7 @@ type Pressure struct {
 	Docker   *docker.Client
 	Inflight *activity.InflightExec
 	Egress   *egress.Manager // Phase 6 — nil-safe
-	Refused  *atomic.Bool // shared with the wake admission code; set when in 5-10% or <5% band
+	Refused  *atomic.Bool    // shared with the wake admission code; set when in 5-10% or <5% band
 	Log      *slog.Logger
 }
 

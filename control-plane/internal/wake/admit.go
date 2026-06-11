@@ -35,10 +35,10 @@ type AdmitConfig struct {
 
 // Outcome is the result of an admission check.
 type Outcome struct {
-	Admit       bool
-	AvailPct    float64
-	AvailBytes  uint64
-	Reason      string // populated when Admit==false
+	Admit      bool
+	AvailPct   float64
+	AvailBytes uint64
+	Reason     string // populated when Admit==false
 }
 
 // Admit performs the CLAUDE.md "Wake admission" calculation:

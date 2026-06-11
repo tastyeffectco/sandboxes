@@ -7,8 +7,8 @@
 // an open WS/SSE connection, an open exec session, a recent HTTP
 // request, or an explicit keepalive_until flag. Phase 5 maps those to:
 //   - WS/SSE          → open-connection poller (or wider grace window
-//                       if no Traefik metric is verifiable; see
-//                       poller.go).
+//     if no Traefik metric is verifiable; see
+//     poller.go).
 //   - exec session    → InflightExec counter below.
 //   - HTTP request    → access-log tailer.
 //   - keepalive_until → SQLite column + idle-reaper skip rule.

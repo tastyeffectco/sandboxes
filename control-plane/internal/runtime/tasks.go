@@ -63,13 +63,13 @@ type TaskResult struct {
 	// when the preview renders. Distinct from BuildErrorMessage, which
 	// is the `pnpm build` output — build_ok can be true while this is
 	// set. See cmd/runtimed/health.go.
-	PreviewErrorMessage string `json:"preview_error_message,omitempty"`
-	CheckpointID       string        `json:"checkpoint_id,omitempty"`
-	DurationMS         int64         `json:"duration_ms"`
-	Tokens             TokenUsage    `json:"tokens"`
-	CreatedAt          time.Time     `json:"created_at"`
-	StartedAt          time.Time     `json:"started_at"`
-	FinishedAt         time.Time     `json:"finished_at"`
+	PreviewErrorMessage string     `json:"preview_error_message,omitempty"`
+	CheckpointID        string     `json:"checkpoint_id,omitempty"`
+	DurationMS          int64      `json:"duration_ms"`
+	Tokens              TokenUsage `json:"tokens"`
+	CreatedAt           time.Time  `json:"created_at"`
+	StartedAt           time.Time  `json:"started_at"`
+	FinishedAt          time.Time  `json:"finished_at"`
 }
 
 // TokenUsage is the model-token accounting for one task — one

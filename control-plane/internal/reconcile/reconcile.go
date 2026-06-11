@@ -31,13 +31,13 @@ import (
 
 // Result is what Once returns to the caller (main.go logs + metrics).
 type Result struct {
-	Duration     time.Duration
-	Rows         int
-	Reapplied    int            // memory.high re-writes that succeeded
-	Stopped      int            // rows we marked stopped because container vanished
-	Errored      int            // rows we marked error
-	EgressAdded  int            // Phase 6 — sandbox_sources_v4 entries re-installed
-	Orphans      map[string]int // "container" / "mount" -> count
+	Duration    time.Duration
+	Rows        int
+	Reapplied   int            // memory.high re-writes that succeeded
+	Stopped     int            // rows we marked stopped because container vanished
+	Errored     int            // rows we marked error
+	EgressAdded int            // Phase 6 — sandbox_sources_v4 entries re-installed
+	Orphans     map[string]int // "container" / "mount" -> count
 }
 
 // Deps is the small set of collaborators the reconciler needs.

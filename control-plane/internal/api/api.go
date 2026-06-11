@@ -80,10 +80,10 @@ type Server struct {
 
 	// Phase 5 additions — nil-safe so existing tests that build a
 	// Server without these still work.
-	Inflight       *activity.InflightExec
-	Wake           *wake.Handler
-	Admit          wake.AdmitConfig
-	KeepaliveMax   time.Duration
+	Inflight     *activity.InflightExec
+	Wake         *wake.Handler
+	Admit        wake.AdmitConfig
+	KeepaliveMax time.Duration
 
 	// Phase 6 — egress policy hook. nil-safe.
 	Egress *egress.Manager
