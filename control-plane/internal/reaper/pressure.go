@@ -16,10 +16,10 @@ import (
 // PressureConfig captures the env-tunable knobs from roadmap §12.
 // Defaults come from CLAUDE.md "Host memory pressure reaper".
 type PressureConfig struct {
-	Interval     time.Duration // SANDBOXD_PRESSURE_INTERVAL_SECONDS (10s)
-	HeadroomPct  float64       // SANDBOXD_MEM_HEADROOM_PCT          (15)
-	RefuseWakesPct float64     // SANDBOXD_MEM_REFUSE_WAKES_PCT      (10)
-	EmergencyPct float64       // SANDBOXD_MEM_EMERGENCY_PCT         (5)
+	Interval       time.Duration // SANDBOXD_PRESSURE_INTERVAL_SECONDS (10s)
+	HeadroomPct    float64       // SANDBOXD_MEM_HEADROOM_PCT          (15)
+	RefuseWakesPct float64       // SANDBOXD_MEM_REFUSE_WAKES_PCT      (10)
+	EmergencyPct   float64       // SANDBOXD_MEM_EMERGENCY_PCT         (5)
 }
 
 // Pressure is the goroutine.
@@ -29,7 +29,7 @@ type Pressure struct {
 	Docker   *docker.Client
 	Inflight *activity.InflightExec
 	Egress   *egress.Manager // Phase 6 — nil-safe
-	Refused  *atomic.Bool // shared with the wake admission code; set when in 5-10% or <5% band
+	Refused  *atomic.Bool    // shared with the wake admission code; set when in 5-10% or <5% band
 	Log      *slog.Logger
 }
 
@@ -129,6 +129,9 @@ func (p *Pressure) stopOldestIdle(ctx context.Context, band string, availPct flo
 	now := time.Now().UTC()
 	// cutoff=now means "any row not currently being marked active";
 	// the skip rules below handle inflight exec / keepalive.
+	// always_on sandboxes are excluded by ListIdleCandidates' SQL filter, so
+	// moderate-pressure reaping skips them by design. The emergency path
+	// (stopHeaviestRSS) intentionally ignores idle_policy to save the host.
 	candidates, err := p.Store.ListIdleCandidates(ctx, now)
 	if err != nil {
 		p.Log.Warn("pressure reaper: list idle candidates failed", "err", err.Error())

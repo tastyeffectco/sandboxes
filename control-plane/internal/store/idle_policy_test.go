@@ -21,13 +21,13 @@ func openTestStore(t *testing.T) *Store {
 
 func minimalSandbox(id, idlePolicy string) *Sandbox {
 	return &Sandbox{
-		ID:           id,
-		Status:       "running",
-		Image:        "sandboxd-base:1.0.0",
-		WorkspaceImg: "/workspaces/" + id + ".img",
-		WorkspaceMnt: "/workspaces/" + id + ".mnt",
-		MemoryHigh:   "4G",
-		IdlePolicy:   idlePolicy,
+		ID:             id,
+		Status:         "running",
+		Image:          "sandboxd-base:1.0.0",
+		WorkspaceImg:   "/workspaces/" + id + ".img",
+		WorkspaceMnt:   "/workspaces/" + id + ".mnt",
+		MemoryHigh:     "4G",
+		IdlePolicy:     idlePolicy,
 		ExternalUserID: sql.NullString{String: "u1", Valid: true},
 	}
 }
@@ -140,5 +140,49 @@ func TestIdlePolicyInListAndListFiltered(t *testing.T) {
 		if s.ID == id && s.IdlePolicy != "always_on" {
 			t.Errorf("ListFiltered: IdlePolicy = %q, want always_on", s.IdlePolicy)
 		}
+	}
+}
+
+func TestListIdleCandidatesExcludesAlwaysOnAtPressureCutoff(t *testing.T) {
+	// The pressure reaper calls ListIdleCandidates(now); a cutoff of "now"
+	// makes every running sandbox a candidate. always_on must STILL be
+	// excluded so moderate memory pressure does not stop it. (The emergency
+	// path is separate and intentionally ignores idle_policy.)
+	st := openTestStore(t)
+	ctx := context.Background()
+
+	sleepID, alwaysOnID := "pressure-sleep", "pressure-always-on"
+	if err := st.Create(ctx, minimalSandbox(sleepID, "sleep")); err != nil {
+		t.Fatalf("Create sleep: %v", err)
+	}
+	if err := st.Create(ctx, minimalSandbox(alwaysOnID, "always_on")); err != nil {
+		t.Fatalf("Create always_on: %v", err)
+	}
+	recent := time.Now().UTC().Add(-1 * time.Second)
+	if err := st.BumpLastActive(ctx, sleepID, recent); err != nil {
+		t.Fatalf("BumpLastActive sleep: %v", err)
+	}
+	if err := st.BumpLastActive(ctx, alwaysOnID, recent); err != nil {
+		t.Fatalf("BumpLastActive always_on: %v", err)
+	}
+
+	candidates, err := st.ListIdleCandidates(ctx, time.Now().UTC())
+	if err != nil {
+		t.Fatalf("ListIdleCandidates: %v", err)
+	}
+	var sawSleep, sawAlwaysOn bool
+	for _, sb := range candidates {
+		switch sb.ID {
+		case sleepID:
+			sawSleep = true
+		case alwaysOnID:
+			sawAlwaysOn = true
+		}
+	}
+	if sawAlwaysOn {
+		t.Errorf("always_on sandbox returned at pressure cutoff — must be excluded")
+	}
+	if !sawSleep {
+		t.Errorf("sleep sandbox not returned at pressure cutoff — must be a candidate")
 	}
 }

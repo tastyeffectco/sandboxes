@@ -34,19 +34,19 @@ import (
 // IdleConfig captures the env-tunable knobs from roadmap §12. Defaults
 // come from CLAUDE.md "Idle lifecycle".
 type IdleConfig struct {
-	Threshold     time.Duration // SANDBOXD_IDLE_THRESHOLD_SECONDS (600s)
-	Interval      time.Duration // SANDBOXD_IDLE_REAP_INTERVAL_SECONDS (30s)
-	WakeGrace     time.Duration // SANDBOXD_WAKE_GRACE_SECONDS (60s) — post-WS/SSE-disconnect grace
+	Threshold time.Duration // SANDBOXD_IDLE_THRESHOLD_SECONDS (600s)
+	Interval  time.Duration // SANDBOXD_IDLE_REAP_INTERVAL_SECONDS (30s)
+	WakeGrace time.Duration // SANDBOXD_WAKE_GRACE_SECONDS (60s) — post-WS/SSE-disconnect grace
 }
 
 // Idle is the goroutine.
 type Idle struct {
-	Cfg    IdleConfig
-	Store  *store.Store
-	Docker *docker.Client
+	Cfg      IdleConfig
+	Store    *store.Store
+	Docker   *docker.Client
 	Inflight *activity.InflightExec
-	Egress *egress.Manager // Phase 6 — nil-safe
-	Log    *slog.Logger
+	Egress   *egress.Manager // Phase 6 — nil-safe
+	Log      *slog.Logger
 }
 
 // Run blocks until ctx is cancelled. A zero or negative Interval
