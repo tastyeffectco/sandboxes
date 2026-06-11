@@ -27,9 +27,10 @@ import (
 // the metric on the running host first (see
 // control-plane/README.md "Phase 5 Traefik connection metric") and
 // either:
-//   (a) supply MetricNameRE + ServiceLabel to the poller, OR
-//   (b) skip the poller entirely (the access-log tailer is the only
-//       signal; SANDBOXD_WAKE_GRACE_SECONDS is widened to compensate).
+//
+//	(a) supply MetricNameRE + ServiceLabel to the poller, OR
+//	(b) skip the poller entirely (the access-log tailer is the only
+//	    signal; SANDBOXD_WAKE_GRACE_SECONDS is widened to compensate).
 //
 // If MetricNameRE is empty the Poller logs a one-liner and exits
 // cleanly without doing any work. Run() returns nil so main.go's

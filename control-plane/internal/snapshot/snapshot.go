@@ -36,9 +36,9 @@ const tsLayout = "2006-01-02-150405"
 
 // Manager owns the snapshot subsystem's configuration + collaborators.
 type Manager struct {
-	WorkspacesRoot string // /var/lib/sandboxed/workspaces
-	SnapshotsRoot  string // /var/lib/sandboxed/_snapshots
-	RetentionDays  int    // SANDBOXD_SNAPSHOT_RETENTION_DAYS (7)
+	WorkspacesRoot string        // /var/lib/sandboxed/workspaces
+	SnapshotsRoot  string        // /var/lib/sandboxed/_snapshots
+	RetentionDays  int           // SANDBOXD_SNAPSHOT_RETENTION_DAYS (7)
 	IdleThreshold  time.Duration // auto-snapshot a stopped sandbox once idle this long (24h)
 
 	Store *store.Store
@@ -48,13 +48,13 @@ type Manager struct {
 
 // Meta is the sidecar JSON written next to each snapshot.
 type Meta struct {
-	TS                 string `json:"ts"`
-	ImageTag           string `json:"image_tag,omitempty"`
-	SizeBytes          int64  `json:"size_bytes"`            // logical (apparent) size of the .img
-	CompressedSizeBytes int64 `json:"compressed_size_bytes"` // size of the .img.zst
-	HostCPUMillis      int64  `json:"host_cpu_ms"`           // zstd child user+sys CPU
-	TakenAt            string `json:"taken_at"`
-	Auto               bool   `json:"auto"` // true if the hourly snapshotter took it
+	TS                  string `json:"ts"`
+	ImageTag            string `json:"image_tag,omitempty"`
+	SizeBytes           int64  `json:"size_bytes"`            // logical (apparent) size of the .img
+	CompressedSizeBytes int64  `json:"compressed_size_bytes"` // size of the .img.zst
+	HostCPUMillis       int64  `json:"host_cpu_ms"`           // zstd child user+sys CPU
+	TakenAt             string `json:"taken_at"`
+	Auto                bool   `json:"auto"` // true if the hourly snapshotter took it
 }
 
 // Entry is one item in a List() result.
@@ -67,9 +67,9 @@ type Entry struct {
 
 // Sentinel errors for callers (the API layer maps them to HTTP codes).
 var (
-	ErrNoImg     = fmt.Errorf("snapshot: no .img on disk for this id")
-	ErrRunning   = fmt.Errorf("snapshot: sandbox row is running; DELETE it first")
-	ErrNotFound  = fmt.Errorf("snapshot: snapshot not found")
+	ErrNoImg    = fmt.Errorf("snapshot: no .img on disk for this id")
+	ErrRunning  = fmt.Errorf("snapshot: sandbox row is running; DELETE it first")
+	ErrNotFound = fmt.Errorf("snapshot: snapshot not found")
 )
 
 // imgPath / mntPath mirror loopback.Manager.Paths so snapshot doesn't

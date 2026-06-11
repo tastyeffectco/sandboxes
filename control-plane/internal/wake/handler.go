@@ -66,8 +66,8 @@ type Handler struct {
 
 	hostRE *regexp.Regexp
 
-	mu        sync.Mutex
-	inflight  map[string]*inflightWake
+	mu       sync.Mutex
+	inflight map[string]*inflightWake
 }
 
 // Config holds the env-tunable knobs the handler needs.
@@ -90,7 +90,7 @@ type jsonWakeResp struct {
 
 // jsonErrResp is the failure body for the JSON path.
 type jsonErrResp struct {
-	Error             string  `json:"error"`
+	Error               string  `json:"error"`
 	MemAvailablePercent float64 `json:"mem_available_percent,omitempty"`
 }
 
@@ -332,7 +332,6 @@ func (h *Handler) serve(r *http.Request, w http.ResponseWriter, id, port string,
 		}
 	}
 
-
 	rel := sb.CgroupPath.String
 	if h.SetMemoryHigh {
 		memHigh := sb.MemoryHigh
@@ -492,7 +491,7 @@ func (h *Handler) respondAdmissionDenied(w http.ResponseWriter, id string, o Out
 	}
 	w.Header().Set("Retry-After", "30")
 	writeJSON(w, http.StatusServiceUnavailable, jsonErrResp{
-		Error:              o.Reason,
+		Error:               o.Reason,
 		MemAvailablePercent: o.AvailPct,
 	})
 }

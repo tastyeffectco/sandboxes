@@ -30,9 +30,9 @@ import (
 // `sandboxd_egress_log_lag_seconds` and journald's own ring buffer
 // caps the damage.
 type Collector struct {
-	Manager  *Manager
-	LogDir   string // /var/log/sandboxed/egress
-	Log      *slog.Logger
+	Manager *Manager
+	LogDir  string // /var/log/sandboxed/egress
+	Log     *slog.Logger
 
 	// JournalctlArgs lets tests inject a fake binary; production
 	// path uses the default ("journalctl", "-k", "-f", "-o", "json",
@@ -46,8 +46,9 @@ type Collector struct {
 
 // kernelMsgRE pulls the fields we care about out of the iptables /
 // nftables kernel log line. Reference shape from the roadmap §7:
-//   sandbox-egress IN=docker0 OUT=ens3 MAC=... SRC=172.17.0.5
-//   DST=140.82.121.4 LEN=60 ... PROTO=TCP SPT=44782 DPT=443 ... SYN
+//
+//	sandbox-egress IN=docker0 OUT=ens3 MAC=... SRC=172.17.0.5
+//	DST=140.82.121.4 LEN=60 ... PROTO=TCP SPT=44782 DPT=443 ... SYN
 //
 // We pull SRC, DST, DPT.
 var (
@@ -110,18 +111,18 @@ func (c *Collector) runOnce(ctx context.Context) error {
 // journalEntry is the slim subset of `journalctl -o json` we read.
 // REALTIME timestamps are microseconds since epoch (systemd convention).
 type journalEntry struct {
-	Message            string `json:"MESSAGE"`
-	RealtimeTimestamp  string `json:"__REALTIME_TIMESTAMP"`
+	Message           string `json:"MESSAGE"`
+	RealtimeTimestamp string `json:"__REALTIME_TIMESTAMP"`
 }
 
 // egressLine is the JSON shape we write to disk. roadmap §7 Stage B.
 type egressLine struct {
-	TS         int64  `json:"ts"`
-	SandboxID  string `json:"sandbox_id"`
-	SrcIP      string `json:"src_ip"`
-	DstIP      string `json:"dst_ip"`
-	DstPort    int    `json:"dst_port"`
-	Event      string `json:"event"`
+	TS        int64  `json:"ts"`
+	SandboxID string `json:"sandbox_id"`
+	SrcIP     string `json:"src_ip"`
+	DstIP     string `json:"dst_ip"`
+	DstPort   int    `json:"dst_port"`
+	Event     string `json:"event"`
 }
 
 func (c *Collector) consume(ctx context.Context, r io.Reader) error {
@@ -247,8 +248,8 @@ type DropPoller struct {
 	Interval time.Duration
 	Log      *slog.Logger
 
-	mu    sync.Mutex
-	prev  map[string]uint64 // reason -> packets
+	mu   sync.Mutex
+	prev map[string]uint64 // reason -> packets
 }
 
 // Run blocks until ctx is cancelled. Interval<=0 → defaults to 30s.

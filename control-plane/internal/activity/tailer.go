@@ -37,9 +37,9 @@ import (
 // can write partial trailing bytes during rotation). A line that
 // doesn't parse as JSON is logged at debug-level and skipped.
 type Tailer struct {
-	LogPath        string         // /var/log/sandboxed/traefik-access.log
-	CheckpointPath string         // /var/lib/sandboxed/state/traefik-tail.offset
-	PreviewDomain  string         // example.com
+	LogPath        string // /var/log/sandboxed/traefik-access.log
+	CheckpointPath string // /var/lib/sandboxed/state/traefik-tail.offset
+	PreviewDomain  string // example.com
 	Store          *store.Store
 	Log            *slog.Logger
 

@@ -35,24 +35,24 @@ func NewClient() *Client { return &Client{Bin: "docker"} }
 // RunSpec carries every flag the Phase 2/3 sandbox-up script emitted.
 // No defaults; callers fill all of these explicitly.
 type RunSpec struct {
-	Name       string   // --name
-	Hostname   string   // --hostname
-	Network    string   // --network (OSS: shared sandboxd_net so Traefik can route)
-	Userns     string   // --userns (OSS: "host" for deterministic workspace ownership)
-	ReadOnly   bool     // --read-only
-	CapDrop    []string // --cap-drop=ALL (passed once per entry)
+	Name        string   // --name
+	Hostname    string   // --hostname
+	Network     string   // --network (OSS: shared sandboxd_net so Traefik can route)
+	Userns      string   // --userns (OSS: "host" for deterministic workspace ownership)
+	ReadOnly    bool     // --read-only
+	CapDrop     []string // --cap-drop=ALL (passed once per entry)
 	SecurityOpt []string // --security-opt=no-new-privileges
-	CPUShares  int      // --cpu-shares=100
-	Memory     string   // --memory=10g
-	MemorySwap string   // --memory-swap=10g
-	PidsLimit  int      // --pids-limit=1024
-	Ulimits    []string // --ulimit nofile=65536:65536
-	Tmpfs      []string // --tmpfs /tmp:size=512m   (one --tmpfs flag per entry)
-	Env        []string // --env KEY=VAL   (one --env flag per entry)
-	Volumes    []string // -v <host>:<container>[:opts]
-	Labels     []string // --label key=value
-	Image      string   // last positional
-	Cmd        []string // optional CMD override
+	CPUShares   int      // --cpu-shares=100
+	Memory      string   // --memory=10g
+	MemorySwap  string   // --memory-swap=10g
+	PidsLimit   int      // --pids-limit=1024
+	Ulimits     []string // --ulimit nofile=65536:65536
+	Tmpfs       []string // --tmpfs /tmp:size=512m   (one --tmpfs flag per entry)
+	Env         []string // --env KEY=VAL   (one --env flag per entry)
+	Volumes     []string // -v <host>:<container>[:opts]
+	Labels      []string // --label key=value
+	Image       string   // last positional
+	Cmd         []string // optional CMD override
 }
 
 // Run starts the container detached and returns its 12-char short ID.
@@ -180,9 +180,11 @@ func (cj *ContainerJSON) BridgeIP() string {
 // Inspect returns the parsed JSON for a container, or ErrNotFound.
 // The "not found" detection uses a CASE-INSENSITIVE substring match
 // because docker's exact wording varies by version and locale:
-//   "Error response from daemon: No such object: s-..."   (older / some)
-//   "Error: no such object: s-..."                         (current)
-//   "Error response from daemon: no such container: s-..." (legacy)
+//
+//	"Error response from daemon: No such object: s-..."   (older / some)
+//	"Error: no such object: s-..."                         (current)
+//	"Error response from daemon: no such container: s-..." (legacy)
+//
 // The original Phase 4 draft used case-sensitive matches and missed
 // the lowercase 'no such object' variant Docker emitted on this host,
 // causing the reconciler's V6 path to mis-handle missing containers.

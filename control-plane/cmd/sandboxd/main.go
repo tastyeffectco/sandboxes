@@ -124,8 +124,8 @@ func main() {
 	tailerOffsetFs := filepath.Join(stateDir, "traefik-tail.offset")
 
 	// OSS docker-native toggles (default to the portable behaviour).
-	network := os.Getenv("SANDBOXD_NETWORK")              // shared docker network for Traefik routing
-	userns := envDefault("SANDBOXD_USERNS", "host")       // sandbox + seed --userns; "host" is deterministic on any daemon
+	network := os.Getenv("SANDBOXD_NETWORK")        // shared docker network for Traefik routing
+	userns := envDefault("SANDBOXD_USERNS", "host") // sandbox + seed --userns; "host" is deterministic on any daemon
 	previewEntrypoint := envDefault("PREVIEW_ENTRYPOINT", "web")
 	previewTLS := boolFromEnv("PREVIEW_TLS", false)
 	setMemoryHigh := boolFromEnv("SANDBOXD_SET_MEMORY_HIGH", false)
