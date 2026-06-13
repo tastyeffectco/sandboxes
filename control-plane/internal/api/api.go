@@ -44,6 +44,8 @@ type Server struct {
 	//                        portable build (the --memory ceiling still applies).
 	Network           string
 	Userns            string
+	Runtime           string
+	DNSResolvConf     string
 	PreviewEntrypoint string
 	PreviewTLS        bool
 	SetMemoryHigh     bool

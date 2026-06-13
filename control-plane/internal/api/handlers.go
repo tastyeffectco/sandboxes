@@ -535,11 +535,17 @@ func (s *Server) handleCreate(w http.ResponseWriter, r *http.Request) {
 	labels := traefik.Labels(req.ID, req.Ports, s.PreviewDomain, visibility, s.PreviewEntrypoint, s.PreviewTLS)
 	startRun := time.Now()
 	var runErr error
+	vols := []string{mntPath + ":/home/sandbox"}
+	if s.DNSResolvConf != "" {
+		// gVisor: override the unreachable embedded DNS (127.0.0.11).
+		vols = append(vols, s.DNSResolvConf+":/etc/resolv.conf:ro")
+	}
 	containerID, runErr := s.Docker.Run(r.Context(), docker.RunSpec{
 		Name:        "s-" + req.ID,
 		Hostname:    "s-" + req.ID,
 		Network:     s.Network,
 		Userns:      s.Userns,
+		Runtime:     s.Runtime,
 		ReadOnly:    true,
 		CapDrop:     []string{"ALL"},
 		SecurityOpt: []string{"no-new-privileges"},
@@ -550,7 +556,7 @@ func (s *Server) handleCreate(w http.ResponseWriter, r *http.Request) {
 		Ulimits:     []string{"nofile=65536:65536"},
 		Tmpfs:       []string{"/tmp:size=512m", "/var/tmp:size=128m"},
 		Env:         envFlags,
-		Volumes:     []string{mntPath + ":/home/sandbox"},
+		Volumes:     vols,
 		Labels:      labels,
 		Image:       s.Image,
 	})

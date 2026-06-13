@@ -71,6 +71,8 @@ services:
       SANDBOXD_IMAGE: ${SANDBOXD_IMAGE:-sandboxd-base:1.0.0}
       SANDBOXD_NETWORK: ${SANDBOXD_NETWORK:-sandboxd_net}
       SANDBOXD_USERNS: ${SANDBOXD_USERNS:-host}
+      SANDBOXD_RUNTIME: ${SANDBOXD_RUNTIME:-}
+      SANDBOXD_DNS: ${SANDBOXD_DNS:-}
       SANDBOXD_DATA_DIR: ${SANDBOXD_DATA_DIR:-/var/lib/sandboxed}
       SANDBOXD_LOG_DIR: ${SANDBOXD_LOG_DIR:-/var/lib/sandboxed/log}
       SANDBOXD_ACCESS_LOG: ${SANDBOXD_LOG_DIR:-/var/lib/sandboxed/log}/traefik-access.log

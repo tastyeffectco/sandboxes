@@ -322,6 +322,36 @@ func main() {
 	wakeHandler.ForwardAuthDenyMode = denyMode
 	wakeHandler.SetMemoryHigh = setMemoryHigh
 
+	// gVisor (opt-in): SANDBOXD_RUNTIME=runsc runs sandboxes under runsc.
+	// gVisor's netstack can't reach Docker's embedded DNS (127.0.0.11) on a
+	// user-defined network, so we write a resolv.conf with real nameservers
+	// (SANDBOXD_DNS, default public resolvers) and bind-mount it into each
+	// sandbox. Requires runsc registered with `--host-uds=create` (docs/gvisor.md).
+	runtime := envDefault("SANDBOXD_RUNTIME", "")
+	var dnsResolvConf string
+	if runtime == "runsc" {
+		var ns []string
+		for _, d := range strings.Split(os.Getenv("SANDBOXD_DNS"), ",") {
+			if d = strings.TrimSpace(d); d != "" {
+				ns = append(ns, d)
+			}
+		}
+		if len(ns) == 0 {
+			ns = []string{"1.1.1.1", "8.8.8.8"}
+		}
+		var b strings.Builder
+		for _, n := range ns {
+			fmt.Fprintf(&b, "nameserver %s\n", n)
+		}
+		dnsResolvConf = filepath.Join(dataDir, "gvisor-resolv.conf")
+		if err := os.WriteFile(dnsResolvConf, []byte(b.String()), 0o644); err != nil {
+			log.Error("gvisor: write resolv.conf failed; sandbox DNS may not resolve", "err", err.Error())
+			dnsResolvConf = ""
+		} else {
+			log.Info("gvisor runtime enabled", "runtime", runtime, "dns", ns)
+		}
+	}
+
 	server := &api.Server{
 		Store:               st,
 		Docker:              dockerClient,
@@ -331,6 +361,8 @@ func main() {
 		Image:               image,
 		Network:             network,
 		Userns:              userns,
+		Runtime:             runtime,
+		DNSResolvConf:       dnsResolvConf,
 		PreviewEntrypoint:   previewEntrypoint,
 		PreviewTLS:          previewTLS,
 		SetMemoryHigh:       setMemoryHigh,
