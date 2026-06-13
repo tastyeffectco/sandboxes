@@ -102,8 +102,14 @@ RUN curl -fsSL https://bun.sh/install | bash -s "bun-v${BUN_VERSION}" \
  && rm -rf /root/.bun
 
 # Claude Code + OpenCode (npm globals).
-RUN npm install -g @anthropic-ai/claude-code opencode-ai \
- && npm cache clean --force
+#RUN npm install -g @anthropic-ai/claude-code opencode-ai \
+# && npm cache clean --force
+
+
+# Install Claude Code (official native method)
+RUN curl -fsSL https://claude.ai/install.sh | bash && \
+    cp /root/.local/bin/claude /usr/local/bin/claude && \
+    chmod 755 /usr/local/bin/claude
 
 # Registry-proxy config + shell env file. /etc/npmrc and /usr/etc/npmrc
 # both ship the same content; /usr/etc/npmrc is the path Node 20's npm
